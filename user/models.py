@@ -72,19 +72,19 @@ class Post(models.Model):
     title =  models.CharField(max_length=40, null=False)
     date_posted = models.DateTimeField(default=timezone.now)
     content = models.TextField(null=False)
-    content_img = models.CharField(max_length=20, null=True)
-    user_id = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    content_img = models.ImageField(upload_to="post_pics", null=False, default='post_default.ico')
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
 
 
 class Comment(models.Model):
-    user_id = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
-    post_id = models.ForeignKey(Post, null=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, null=False, on_delete=models.CASCADE)
     body = models.TextField(null=False)
     date_posted = models.DateTimeField(null=False, default=timezone.now)
 
     def __str__(self):
-        return f"Comment('{self.author}', '{self.body}')"
+        return f"Comment('{self.user.user_name}', '{self.body}')"
         
