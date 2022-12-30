@@ -42,7 +42,7 @@ class AccountManager(BaseUserManager):
 
 
 def generate_unique_token():
-    return f"{secrets.token_hex(180)}{time.time()}"
+    return f"{secrets.token_hex(16)}{time.time()}".replace(".", "")
 
 
 # create the custom user model
