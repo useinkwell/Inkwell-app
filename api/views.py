@@ -1,16 +1,24 @@
 from django.shortcuts import render
 
-from django.http import JsonResponse
-from user.models import Post
+# models
+from .serializers import Post
+
+# serializers
 from .serializers import PostSerializer
 
+# response / status
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
 
-def posts_list(request):    
-     # get all the posts from database
-    posts = Post.objects.all()
+# class-based API views
+from rest_framework.views import APIView
 
-    # serialize them to json
-    serializer = PostSerializer(posts, many=True)
 
-    # return json
-    return JsonResponse({"posts": serializer.data})
+class PostList(APIView):
+
+    def get(self, request):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+        
