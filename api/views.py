@@ -97,7 +97,12 @@ class PostCreate(APIView):
 
 class LoginView(APIView):
     def post(self, request):
-        data = json.loads(self.request.body)
+
+        # first try to get login details from the query params (/?email=)
+        data = request.GET
+        if not data:
+            # otherwise get login from the request body
+            data = json.loads(self.request.body)
 
         email = data['email']
         password = data['password']
