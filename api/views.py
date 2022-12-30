@@ -66,3 +66,26 @@ class AccountDetail(APIView):
                 'api_token':'classified'
             }
             return Response(response_data)
+
+
+class PostCreate(APIView):
+    
+    def post(self, request, api_key):
+
+        user = User.objects.get(api_token=api_key)
+        if user:
+            id = str(user.id)
+
+            data = {
+                "title": self.request.GET.get("title"),
+                "content": self.request.GET.get("content"),
+                "user": id
+            }
+
+            serializer = PostSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
