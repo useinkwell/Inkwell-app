@@ -102,7 +102,7 @@ class LoginView(APIView):
         data = request.GET
         if not data:
             # otherwise get login from the request body
-            data = json.loads(self.request.body)
+            data = json.loads(request.body)
 
         email = data['email']
         password = data['password']
