@@ -21,4 +21,11 @@ class PostList(APIView):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
-        
+
+     
+class PostDetail(APIView):
+
+     def get(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        serializer = PostSerializer(post)
+        return Response(serializer.data)
