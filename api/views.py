@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+import json
+from django.conf import settings
 
 # models
 from .serializers import Post, User
@@ -13,6 +15,9 @@ from django.shortcuts import get_object_or_404
 
 # class-based API views
 from rest_framework.views import APIView
+
+# authentication
+from django.contrib.auth import authenticate, login
 
 
 class PostList(APIView):
@@ -88,4 +93,37 @@ class PostCreate(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+class LoginView(APIView):
+    def post(self, request):
+        data = json.loads(self.request.body)
+
+        email = data['email']
+        password = data['password']
+ 
+        # Authenticate the user
+        user = authenticate(request, username=email, password=password)
+ 
+        if user is not None:
+
+            login(request=request, user=user)
+ 
+            # Return the token as part of the response
+            return redirect(settings.LOGIN_REDIRECT_URL)
+ 
+        else:
+            # Return a response indicating that the login failed
+            return Response({"login": "failed"})
+
+
+class LoginSuccess(APIView):
+
+    def get(self, request):        
+        return Response({"login": "successful"})
+
+
+class LogoutSuccess(APIView):
+
+    def get(self, request):        
+        return Response({"logout": "successful"})
