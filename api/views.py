@@ -36,7 +36,7 @@ class PostDetail(APIView):
         return Response(serializer.data)
 
 
-class UserMembership(APIView):          
+class Membership(APIView):          
 
      def get(self, request, pk=None):
         
