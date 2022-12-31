@@ -57,21 +57,27 @@ class AccountDetail(APIView):
     def api_key_is_valid(self, key):
         return User.objects.get(api_token=key)
 
-    def get(self, request, api_key, username):
+    def get(self, request, api_key=None, username=None):
+        
+        response_data = {}
 
-        if self.api_key_is_valid(api_key):
-            user = User.objects.get(user_name=username)
-            serializer = UserSerializer(user)
-            data = serializer.data
-            response_data = {
-                'id':data['id'],
-                'usename':data['user_name'],
-                'email':data['email'],
-                'membership':data['membership'],
-                'image_file':data['image_file'],
-                'api_token':'classified'
-            }
-            return Response(response_data)
+        if api_key and username:
+            if self.api_key_is_valid(api_key):
+                user = User.objects.get(user_name=username)
+        else:
+            user = request.user
+            
+        serializer = UserSerializer(user)
+        data = serializer.data
+        response_data = {
+            'id':data['id'],
+            'usename':data['user_name'],
+            'email':data['email'],
+            'membership':data['membership'],
+            'image_file':data['image_file'],
+            'api_token':'classified'
+        }
+        return Response(response_data)
 
 
 class PostCreate(APIView):
