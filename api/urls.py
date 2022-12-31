@@ -15,5 +15,6 @@ urlpatterns = [
     path('membership/<pk>/', views.Membership.as_view(), name='membership'),
     path('membership/', views.Membership.as_view(), name='membership'),
     path('<api_key>/account/<username>/', views.AccountDetail.as_view(), name='account-detail'),
+    path('account/', views.AccountDetail.as_view(), name='account-detail'),
     path('post/new/<str:api_key>/', views.PostCreate.as_view(), name='post_create'),
 ]
