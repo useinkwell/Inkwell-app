@@ -12,7 +12,7 @@ urlpatterns = [
 
     path('post/<pk>/', views.SpecificPost.as_view(), name='specific_post'),
     path('post/all/', views.PostList.as_view(), name='all_posts'),
-    path('membership/<pk>/', views.Membership.as_view(), name='membership'),
+    path('membership/<pk>/', views.MembershipForUsername.as_view(), name='membership_username'),
     path('membership/', views.Membership.as_view(), name='membership'),
     path('<api_key>/account/<username>/', views.AccountInfo.as_view(), name='account_detail'),
     path('account/', views.AccountInfo.as_view(), name='account_detail'),
