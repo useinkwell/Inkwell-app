@@ -39,16 +39,17 @@ class PostDetail(APIView):
 class UserMembership(APIView):          
 
      def get(self, request, pk=None):
-
-        # specific user
-        if pk:
-            user = User.objects.get(pk=pk)
-            serializer = UserSerializer(user)
-            return Response({'membership':serializer.data['membership']})
         
-        # current logged-in user
+        if pk:
+            # any specific user
+            user = User.objects.get(pk=pk)
+        
         else:
-            pass
+            # current logged-in user
+            user = request.user
+
+        serializer = UserSerializer(user)
+        return Response({'membership':serializer.data['membership']})
                
 
 class AccountDetail(APIView):
