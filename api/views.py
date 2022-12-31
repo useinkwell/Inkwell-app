@@ -28,7 +28,7 @@ class PostList(APIView):
         return Response(serializer.data)
 
      
-class PostDetail(APIView):
+class SpecificPost(APIView):
 
      def get(self, request, pk):
         post = Post.objects.get(pk=pk)
@@ -52,21 +52,19 @@ class Membership(APIView):
         return Response({'membership':serializer.data['membership']})
                
 
-class AccountDetail(APIView):
+class AccountInfo(APIView):
 
     def api_key_is_valid(self, key):
         return User.objects.get(api_token=key)
 
     def get(self, request, api_key=None, username=None):
-        
-        response_data = {}
 
         if api_key and username:
             if self.api_key_is_valid(api_key):
                 user = User.objects.get(user_name=username)
         else:
             user = request.user
-            
+
         serializer = UserSerializer(user)
         data = serializer.data
         response_data = {
