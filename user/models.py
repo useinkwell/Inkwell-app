@@ -53,12 +53,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=150, blank=True)    
     date_registered = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     image_file = models.ImageField(upload_to="profile_pics", null=False, default='default.ico')
     bio = models.CharField(max_length=500, null=False, default="nothing to see here")
     membership = models.CharField(max_length=20, null=False, default="Basic")
-    api_token = models.CharField(max_length=200, unique=True, default=generate_unique_token())
+    api_token = models.CharField(max_length=200, unique=True, default=generate_unique_token)
 
     USERNAME_FIELD = 'email'    
     REQUIRED_FIELDS = ['user_name', 'first_name', 'last_name']

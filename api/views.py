@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 
 # class-based API views
 from rest_framework.views import APIView
+from rest_framework.mixins import CreateModelMixin
 
 # authentication
 from django.contrib.auth import authenticate, login
@@ -131,40 +132,40 @@ class PostCreate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginView(APIView):
-    def post(self, request):
+# class LoginView(APIView):
+#     def post(self, request):
 
-        # first try to get login details from the query params (/?email=)
-        data = request.GET
-        if not data:
-            # otherwise get login from the request body
-            data = json.loads(request.body)
+#         # first try to get login details from the query params (/?email=)
+#         data = request.GET
+#         if not data:
+#             # otherwise get login from the request body
+#             data = json.loads(request.body)
 
-        email = data['email']
-        password = data['password']
+#         email = data['email']
+#         password = data['password']
  
-        # Authenticate the user
-        user = authenticate(request, username=email, password=password)
+#         # Authenticate the user
+#         user = authenticate(request, username=email, password=password)
  
-        if user is not None:
+#         if user is not None:
 
-            login(request=request, user=user)
+#             login(request=request, user=user)
  
-            # Return the token as part of the response
-            return redirect(settings.LOGIN_REDIRECT_URL)
+#             # Return the token as part of the response
+#             return redirect(settings.LOGIN_REDIRECT_URL)
  
-        else:
-            # Return a response indicating that the login failed
-            return Response({"login": "failed"})
+#         else:
+#             # Return a response indicating that the login failed
+#             return Response({"login": "failed"})
 
 
-class LoginSuccess(APIView):
+# class LoginSuccess(APIView):
 
-    def get(self, request):        
-        return Response({"login": "successful"})
+#     def get(self, request):        
+#         return Response({"login": "successful"})
 
 
-class LogoutSuccess(APIView):
-
+# class LogoutSuccess(APIView):
     def get(self, request):        
         return Response({"logout": "successful"})
+

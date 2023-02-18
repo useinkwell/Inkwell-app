@@ -5,3 +5,6 @@ djangorestframework==3.14.0
 pytz==2022.7
 sqlparse==0.4.3
 tzdata==2022.7
+djangorestframework-simplejwt==5.2.2
+Pillow==9.4.0
+
