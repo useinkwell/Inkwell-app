@@ -129,12 +129,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = 'login'
-
-LOGOUT_URL = 'logout'
-
-LOGIN_REDIRECT_URL = 'login-success'
-
-LOGOUT_REDIRECT_URL = 'logout-success'
-
 AUTH_USER_MODEL = 'user.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': 
+    (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
