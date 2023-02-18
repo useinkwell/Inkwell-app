@@ -18,9 +18,14 @@ from rest_framework.views import APIView
 
 # authentication
 from django.contrib.auth import authenticate, login
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+
+# permissions
+from rest_framework.permissions import IsAuthenticated
 
 # jwt authentication
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class PostList(APIView):
@@ -113,24 +118,25 @@ class AccountInfoForUsername(APIView):
 
 
 class PostCreate(APIView):
+
+    permission_classes = [IsAuthenticated]
     
     def post(self, *args, **kwargs):
 
         user = self.request.user
-        if user.is_authenticated:
-            id = str(user.id)
+        id = str(user.id)
 
-            data = {
-                "title": self.request.POST.get("title"),
-                "content": self.request.POST.get("content"),
-                "user": id
-            }
+        data = {
+            "title": self.request.POST.get("title"),
+            "content": self.request.POST.get("content"),
+            "user": id
+        }
 
-            serializer = PostSerializer(data=data)
+        serializer = PostSerializer(data=data)
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
