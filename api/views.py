@@ -114,15 +114,15 @@ class AccountInfoForUsername(APIView):
 
 class PostCreate(APIView):
     
-    def post(self, request, api_key):
+    def post(self, *args, **kwargs):
 
-        user = User.objects.get(api_token=api_key)
-        if user:
+        user = self.request.user
+        if user.is_authenticated:
             id = str(user.id)
 
             data = {
-                "title": self.request.GET.get("title"),
-                "content": self.request.GET.get("content"),
+                "title": self.request.POST.get("title"),
+                "content": self.request.POST.get("content"),
                 "user": id
             }
 
