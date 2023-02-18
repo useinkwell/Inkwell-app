@@ -15,10 +15,12 @@ from django.shortcuts import get_object_or_404
 
 # class-based API views
 from rest_framework.views import APIView
-from rest_framework.mixins import CreateModelMixin
 
 # authentication
 from django.contrib.auth import authenticate, login
+
+# jwt authentication
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class PostList(APIView):
@@ -132,40 +134,26 @@ class PostCreate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class LoginView(APIView):
-#     def post(self, request):
+class Register(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.POST)
+        data = {}
 
-#         # first try to get login details from the query params (/?email=)
-#         data = request.GET
-#         if not data:
-#             # otherwise get login from the request body
-#             data = json.loads(request.body)
+        if serializer.is_valid():
+            new_user = serializer.save()
 
-#         email = data['email']
-#         password = data['password']
- 
-#         # Authenticate the user
-#         user = authenticate(request, username=email, password=password)
- 
-#         if user is not None:
+            # generate jwt access tokens for the new user
+            refresh_instance = RefreshToken.for_user(new_user)
+            tokens = {
+                'refresh_token': str(refresh_instance),
+                'access_token': str(refresh_instance.access_token)
+            }
 
-#             login(request=request, user=user)
- 
-#             # Return the token as part of the response
-#             return redirect(settings.LOGIN_REDIRECT_URL)
- 
-#         else:
-#             # Return a response indicating that the login failed
-#             return Response({"login": "failed"})
+            data['response'] = 'Registration Successful'
+            data['user_name'] = new_user.user_name
+            data['email'] = new_user.email
+            data['tokens'] = tokens
 
+            return Response(data, status=status.HTTP_201_CREATED)
 
-# class LoginSuccess(APIView):
-
-#     def get(self, request):        
-#         return Response({"login": "successful"})
-
-
-# class LogoutSuccess(APIView):
-    def get(self, request):        
-        return Response({"logout": "successful"})
-
+        return Response (serializer.errors, status=status.HTTP_400_BAD_REQUEST)

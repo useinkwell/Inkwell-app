@@ -49,8 +49,8 @@ def generate_unique_token():
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('email address', unique=True)
     user_name = models.CharField(max_length=150, unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)    
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)    
     date_registered = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
