@@ -15,10 +15,12 @@ from django.shortcuts import get_object_or_404
 
 # class-based API views
 from rest_framework.views import APIView
+from rest_framework import generics
+from rest_framework import mixins
+
 
 # authentication
 from django.contrib.auth import authenticate, login
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 
 # permissions
 from rest_framework.permissions import IsAuthenticated
@@ -28,22 +30,49 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
-class PostList(APIView):
+class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
+                                                generics.GenericAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
 
-    def get(self, request):
-        posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        data = {
+            "title": self.request.POST.get("title"),
+            "content": self.request.POST.get("content"),
+            "user": self.request.user
+        }
+
+        serializer = PostSerializer(data=data)
+
+        if serializer.is_valid():
+            # create a post instance using the data
+            post = Post(**data)
+            post.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
      
-class SpecificPost(APIView):
+class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin, generics.GenericAPIView):
 
-     def get(self, request, pk):
-        post = Post.objects.get(pk=pk)
-        serializer = PostSerializer(post)
-        return Response(serializer.data)
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
 
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    
 class Membership(APIView):          
 
      def get(self, request):
@@ -115,29 +144,6 @@ class AccountInfoForUsername(APIView):
                 'api_token':'classified'
             }
         return Response(response_data)
-
-
-class PostCreate(APIView):
-
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, *args, **kwargs):
-
-        user = self.request.user
-        id = str(user.id)
-
-        data = {
-            "title": self.request.POST.get("title"),
-            "content": self.request.POST.get("content"),
-            "user": id
-        }
-
-        serializer = PostSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Register(APIView):

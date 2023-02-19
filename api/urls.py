@@ -13,10 +13,9 @@ urlpatterns = [
 	path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', views.Register.as_view(), name="register"),   
 
-    path('post/<int:pk>/', views.SpecificPost.as_view(), name='specific_post'),
-    path('posts/all/', views.PostList.as_view(), name='all_posts'),
-    path('posts/new/', views.PostCreate.as_view(), name='post_create'),
-
+    path('posts/', views.PostList.as_view(), name='post_list'),
+    path('post/<int:pk>/', views.PostDetail.as_view(), name='post_detail'),
+    
     path('membership/<int:pk>/', views.MembershipForUsername.as_view(), name='membership_username'),
     path('membership/', views.Membership.as_view(), name='membership'),
 
