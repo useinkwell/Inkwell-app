@@ -78,14 +78,15 @@ class Membership(APIView):
      def get(self, request):
         
         user = request.user
-        serializer = UserSerializer(user)
-        data = serializer.data
-        
-        response_data = {
-            'membership': data['membership']
-        }
-
-        return Response(response_data)
+        if user.is_authenticated:
+            serializer = UserSerializer(user)
+            data = serializer.data
+            
+            response_data = {
+                'membership': data['membership']
+            }
+            return Response(response_data)
+        return Response({'error': 'no authentication'}, status.HTTP_400_BAD_REQUEST)
  
 
 class MembershipForUsername(APIView):          
@@ -98,7 +99,7 @@ class MembershipForUsername(APIView):
 
         response_data = {
             'email': data['email'],
-            'usename': data['user_name'],            
+            'username': data['user_name'],            
             'membership': data['membership']
         }
 
@@ -114,11 +115,11 @@ class AccountInfo(APIView):
         data = serializer.data
         response_data = {
             'id': data['id'],
-            'usename': data['user_name'],
+            'username': data['user_name'],
             'email': data['email'],
             'membership': data['membership'],
             'image_file': data['image_file'],
-            'api_token': data['api_token']
+            'access_tokens': get_jwt_access_tokens_for_user(user)
         }
         return Response(response_data)
 
@@ -128,22 +129,32 @@ class AccountInfoForUsername(APIView):
     def api_key_is_valid(self, key):
         return User.objects.get(api_token=key)
 
-    def get(self, request, api_key, username):
+    def get(self, request, username):
 
-        user = User.objects.get(user_name=username)
+        other_user = User.objects.get(user_name=username)
 
-        if user and self.api_key_is_valid(api_key):
-            serializer = UserSerializer(user)
+        if other_user and self.request.user.is_authenticated:
+            serializer = UserSerializer(other_user)
             data = serializer.data
             response_data = {
                 'id':data['id'],
-                'usename':data['user_name'],
+                'username':data['user_name'],
                 'email':data['email'],
                 'membership':data['membership'],
                 'image_file':data['image_file'],
-                'api_token':'classified'
+                'access_tokens':'classified'
             }
         return Response(response_data)
+
+
+def get_jwt_access_tokens_for_user(user_instance):
+    # generate jwt access tokens for the new user
+    refresh_instance = RefreshToken.for_user(user_instance)
+    tokens = {
+        'refresh_token': str(refresh_instance),
+        'access_token': str(refresh_instance.access_token)
+    }
+    return tokens
 
 
 class Register(APIView):
@@ -155,11 +166,7 @@ class Register(APIView):
             new_user = serializer.save()
 
             # generate jwt access tokens for the new user
-            refresh_instance = RefreshToken.for_user(new_user)
-            tokens = {
-                'refresh_token': str(refresh_instance),
-                'access_token': str(refresh_instance.access_token)
-            }
+            tokens = get_jwt_access_tokens_for_user(new_user)
 
             data['response'] = 'Registration Successful'
             data['user_name'] = new_user.user_name

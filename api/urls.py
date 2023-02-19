@@ -19,6 +19,6 @@ urlpatterns = [
     path('membership/<int:pk>/', views.MembershipForUsername.as_view(), name='membership_username'),
     path('membership/', views.Membership.as_view(), name='membership'),
 
-    path('<api_key>/account/<username>/', views.AccountInfoForUsername.as_view(), name='account_detail_username'),
+    path('account/<username>/', views.AccountInfoForUsername.as_view(), name='account_detail_username'),
     path('account/', views.AccountInfo.as_view(), name='account_detail'),
 ]
