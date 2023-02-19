@@ -158,6 +158,11 @@ def get_jwt_access_tokens_for_user(user_instance):
 
 
 class Register(APIView):
+
+    # exempt this view from using authentication/permissions
+    permission_classes = []
+    authentication_classes = []
+
     def post(self, request):
         serializer = UserSerializer(data=request.POST)
         data = {}
