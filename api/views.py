@@ -23,7 +23,8 @@ from rest_framework import mixins
 from django.contrib.auth import authenticate, login
 
 # permissions
-from rest_framework.permissions import IsAuthenticated
+from .permissions import (IsAdmin, IsAuthenticated, IsAdminElseReadOnly,
+IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly)
 
 # jwt authentication
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -32,6 +33,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
+
+    permission_classes = [IsAuthenticatedElseReadOnly]
+
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
@@ -60,6 +64,8 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
 class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin, generics.GenericAPIView):
 
+    permission_classes = [IsPostAuthorElseReadOnly]
+
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
@@ -73,10 +79,12 @@ class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
         return self.destroy(request, *args, **kwargs)
 
     
-class Membership(APIView):          
+class Membership(APIView):
 
-     def get(self, request):
-        
+    permission_classes = [IsAuthenticated]        
+
+    def get(self, request):
+    
         user = request.user
         if user.is_authenticated:
             serializer = UserSerializer(user)
@@ -89,9 +97,11 @@ class Membership(APIView):
         return Response({'error': 'no authentication'}, status.HTTP_400_BAD_REQUEST)
  
 
-class MembershipForUsername(APIView):          
+class MembershipForUsername(APIView):
 
-     def get(self, request, pk):
+    permission_classes = [IsAdmin]          
+
+    def get(self, request, pk):
         
         user = User.objects.get(pk=pk)
         serializer = UserSerializer(user)
@@ -107,6 +117,8 @@ class MembershipForUsername(APIView):
 
 
 class AccountInfo(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
@@ -126,8 +138,7 @@ class AccountInfo(APIView):
 
 class AccountInfoForUsername(APIView):
 
-    def api_key_is_valid(self, key):
-        return User.objects.get(api_token=key)
+    permission_classes = [IsAdmin]
 
     def get(self, request, username):
 
@@ -181,3 +192,4 @@ class Register(APIView):
             return Response(data, status=status.HTTP_201_CREATED)
 
         return Response (serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
