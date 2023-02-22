@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 import json
 from django.conf import settings
 
+
 # models
 from .serializers import Post, User
 
@@ -36,7 +37,6 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
 
     permission_classes = [IsAuthenticatedElseReadOnly]
 
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
 
     def get(self, request, *args, **kwargs):
@@ -59,6 +59,30 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        # get the search term submitted with GET
+        search_term = self.request.GET.get('search')
+        filter = self.request.GET.get('filter')
+
+        if search_term:
+            # filter example format: <model field>__icontains=<search term>
+            if filter == 'title':
+                filtered_query = Post.objects.filter(
+                                title__icontains=search_term).all()
+            elif filter == 'category':
+                filtered_query = Post.objects.filter(
+                                category__icontains=search_term).all()
+            elif filter == 'author':
+                filtered_query = Post.objects.filter(
+                        user__user_name__istartswith=search_term).all()
+            elif filter == 'hashtag':
+                filtered_query = Post.objects.filter(
+                                hashtags__icontains=search_term).all()
+            return filtered_query
+        else:
+            # return this query if search field is empty (e.g on page load)
+            return Post.objects.all()  # or None, depending on preference
 
      
 class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
