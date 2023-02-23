@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 import json
 from django.conf import settings
-from .pagination import PaginationConfig
+from .pagination import PostPaginationConfig
 
 
 # models
@@ -37,7 +37,6 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
 
     permission_classes = [IsAuthenticatedElseReadOnly]
-    # pagination_class = PaginationConfig
     ordering = '-id'
 
     serializer_class = PostSerializer
