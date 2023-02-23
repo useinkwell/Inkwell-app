@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 import json
 from django.conf import settings
+from .pagination import PaginationConfig
 
 
 # models
@@ -36,6 +37,8 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
 
     permission_classes = [IsAuthenticatedElseReadOnly]
+    # pagination_class = PaginationConfig
+    ordering = '-id'
 
     serializer_class = PostSerializer
 
@@ -79,10 +82,10 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
             elif filter == 'hashtag':
                 filtered_query = Post.objects.filter(
                                 hashtags__icontains=search_term).all()
-            return filtered_query
+            return filtered_query.order_by(PostList.ordering)
         else:
             # return this query if search field is empty (e.g on page load)
-            return Post.objects.all()  # or None, depending on preference
+            return Post.objects.order_by(PostList.ordering).all()
 
      
 class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
