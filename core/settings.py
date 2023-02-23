@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'user',
-    'api'
+    'social_platform'
 ]
 
 MIDDLEWARE = [
@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
-    'DEFAULT_PAGINATION_CLASS': 'api.pagination.PostPaginationConfig'
+    'DEFAULT_PAGINATION_CLASS': 'social_platform.pagination.PostPaginationConfig'
 }
 
 SIMPLE_JWT = {
