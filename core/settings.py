@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
-    'DEFAULT_PAGINATION_CLASS': 'api.pagination.PaginationConfig'
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.PostPaginationConfig'
 }
 
 SIMPLE_JWT = {
