@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect
 import json
 from django.conf import settings
-from .pagination import PostPaginationConfig
-
 
 # models
-from .serializers import Post, User
+from social_platform.models import Post
+from user.models import User
 
 # serializers
-from .serializers import PostSerializer, UserSerializer
+from .serializers import PostSerializer
+from user.api.serializers import UserSerializer
 
 # response / status
 from rest_framework.response import Response
@@ -20,7 +20,6 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import mixins
 
-
 # authentication
 from django.contrib.auth import authenticate, login
 
@@ -29,8 +28,8 @@ from .permissions import (IsAdmin, IsAuthenticated, IsAdminElseReadOnly,
 IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly)
 
 # jwt authentication
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from user.api.views import get_jwt_access_tokens_for_user
 
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
@@ -183,39 +182,5 @@ class AccountInfoForUsername(APIView):
             }
         return Response(response_data)
 
-
-def get_jwt_access_tokens_for_user(user_instance):
-    # generate jwt access tokens for the new user
-    refresh_instance = RefreshToken.for_user(user_instance)
-    tokens = {
-        'refresh_token': str(refresh_instance),
-        'access_token': str(refresh_instance.access_token)
-    }
-    return tokens
-
-
-class Register(APIView):
-
-    # exempt this view from using authentication/permissions
-    permission_classes = []
-    authentication_classes = []
-
-    def post(self, request):
-        serializer = UserSerializer(data=request.POST)
-        data = {}
-
-        if serializer.is_valid():
-            new_user = serializer.save()
-
-            # generate jwt access tokens for the new user
-            tokens = get_jwt_access_tokens_for_user(new_user)
-
-            data['response'] = 'Registration Successful'
-            data['user_name'] = new_user.user_name
-            data['email'] = new_user.email
-            data['tokens'] = tokens
-
-            return Response(data, status=status.HTTP_201_CREATED)
-
-        return Response (serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
         
