@@ -15,7 +15,7 @@ class Post(models.Model):
     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+        return f"Post__by {self.user.user_name}__('{self.title}', '{self.date_posted}')"
 
 
 class Comment(models.Model):
