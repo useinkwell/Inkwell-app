@@ -45,16 +45,14 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
 
     def post(self, request, *args, **kwargs):
 
-        data = {
-            "title": self.request.POST.get("title"),
-            "content": self.request.POST.get("content"),
-            "user": self.request.user
-        }
+        # get dictionary equivalent of POST data and add additional data
+        data = request.POST.dict()  # {'title': title, 'content': content,...}
+        data['user'] = self.request.user
 
         serializer = PostSerializer(data=data)
 
         if serializer.is_valid():
-            # create a post instance using the data
+            # create a post instance using the POST data
             post = Post(**data)
             post.save()
 
