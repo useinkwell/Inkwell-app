@@ -12,4 +12,8 @@ urlpatterns = [
 
     path('account/<username>/', views.AccountInfoForUsername.as_view(), name='account_detail_username'),
     path('account/', views.AccountInfo.as_view(), name='account_detail'),
+
+    path('following/follow/<str:username>/', views.FollowUser.as_view(), name='follow'),
+    path('following/unfollow/<str:username>/', views.UnfollowUser.as_view(), name='unfollow'),
+    path('following/check/<str:username>/', views.CheckFollowership.as_view(), name='check_followership'),
 ]
