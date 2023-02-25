@@ -117,7 +117,8 @@ class Membership(APIView):
                 'membership': data['membership']
             }
             return Response(response_data)
-        return Response({'error': 'no authentication'}, status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'no authentication'}, 
+                                        status.HTTP_400_BAD_REQUEST)
  
 
 class MembershipForUsername(APIView):
@@ -181,4 +182,51 @@ class AccountInfoForUsername(APIView):
         return Response(response_data)
 
     
-        
+class FollowUser(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, username):
+        user_to_follow = User.objects.filter(user_name=username).first()
+        if user_to_follow:
+            user_to_follow.followers.add(self.request.user)
+            return Response({'followed user': username}, 
+                                status=status.HTTP_200_OK)
+        return Response({"error": "couldn't follow user"},
+                                status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class UnfollowUser(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, username):
+        user_to_unfollow = User.objects.filter(user_name=username).first()
+        if user_to_unfollow:
+            user_to_unfollow.followers.remove(self.request.user)
+            return Response({'unfollowed user': username},
+                                                status=status.HTTP_200_OK)
+        return Response({"error": "couldn't unfollow user"},
+                                status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class CheckFollowership(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, username):
+        other_user = User.objects.filter(user_name=username).first()
+        if other_user:
+            current_user_follows_other = \
+                            self.request.user in other_user.followers.all()
+            other_user_follows_current = \
+                            other_user in self.request.user.followers.all()
+
+            followership = {
+                'current_user_follows_other': current_user_follows_other,
+                'other_user_follows_current': other_user_follows_current
+            }
+            return Response(followership, status=status.HTTP_200_OK)
+        return Response({"error": "couldn't fetch other user"},
+                            status=status.HTTP_417_EXPECTATION_FAILED)
+
