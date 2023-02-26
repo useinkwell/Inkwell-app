@@ -8,6 +8,7 @@ User = get_user_model()
 class Post(models.Model):
     title =  models.CharField(max_length=40, null=False)
     category = models.CharField(max_length=40, null=True, blank=True)
+    caption = models.CharField(max_length=100, null=True, blank=True)
     date_posted = models.DateTimeField(default=timezone.now)
     content = models.TextField(null=False)
     content_img = models.ImageField(upload_to="post_pics", null=False, default='post_default.ico')
