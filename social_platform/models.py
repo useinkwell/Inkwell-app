@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
+from django_editorjs import EditorJsField
 
 
 class Post(models.Model):
@@ -10,7 +11,7 @@ class Post(models.Model):
     category = models.CharField(max_length=40, null=True, blank=True)
     caption = models.CharField(max_length=100, null=True, blank=True)
     date_posted = models.DateTimeField(default=timezone.now)
-    content = models.TextField(null=False)
+    content = EditorJsField()
     content_img = models.ImageField(upload_to="post_pics", null=False, default='post_default.ico')
     hashtags = models.CharField(max_length=200, null=True, blank=True)
     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
