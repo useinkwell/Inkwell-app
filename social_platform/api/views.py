@@ -32,6 +32,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from user.api.views import get_jwt_access_tokens_for_user
 
 
+from django.core.files.storage import FileSystemStorage
+
+
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
 
@@ -49,6 +52,8 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
         data = request.POST.dict()  # {'title': title, 'content': content,...}
         data['user'] = self.request.user
 
+        print(f"ORDERED_DICT: {data}\n\n\n")
+
         serializer = PostSerializer(data=data)
 
         if serializer.is_valid():
@@ -56,8 +61,19 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
             post = Post(**data)
             post.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            valid_data = serializer.data
+
+            # image upload
+            request_file_object = request.FILES['image']
+            file_storage = FileSystemStorage()
+            file_name = str(request_file_object).split('.')[0]
+            stored_file = file_storage.save(file_name, request_file_object)
+            file_url = file_storage.url(stored_file)
+            valid_data["file"] = {"url": file_url}
+
+            return Response(valid_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def get_queryset(self):
         # get the search term submitted with GET
@@ -230,3 +246,13 @@ class CheckFollowership(APIView):
         return Response({"error": "couldn't fetch other user"},
                             status=status.HTTP_417_EXPECTATION_FAILED)
 
+
+class UploadImage(APIView):
+    def post(self, request):
+        f = request.FILES['image']
+        fs = FileSystemStorage()
+        file_name = str(f).split('.')[0]
+        file = fs.save(file_name, f)
+        file_url = fs.url(file)
+        return Response({"success": 1, "file": {"url": file_url}})
+        
