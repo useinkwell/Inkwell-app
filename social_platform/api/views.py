@@ -257,12 +257,18 @@ class React(APIView):
         content_type = ContentType.objects.get(model=model.lower())
         object_reacted_on = content_type.get_object_for_this_type(id=instance_id)
 
+        user = self.request.user
+        is_duplicate_reaction = Reaction.objects.filter(user=user, emoji=emoji).first()
+        if is_duplicate_reaction:
+            return Response({emoji: f"already reacted by user on this {model}"},
+                             status=status.HTTP_417_EXPECTATION_FAILED)
+
         # Create a new Reaction object for a specific Post/Comment object
         reaction = Reaction(
         content_type=content_type,
         object_id=object_reacted_on.id,
         content_object=object_reacted_on,
-        user=self.request.user,
+        user=user,
         emoji=emoji
         )
         reaction.save()
