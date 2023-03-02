@@ -5,6 +5,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 from django_editorjs import EditorJsField
 
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
 
 class Post(models.Model):
     title =  models.CharField(max_length=40, null=False)
@@ -28,4 +31,18 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment('{self.user.user_name}', '{self.body}')"
+
+
+class Reaction(models.Model):
+    emoji = models.CharField(max_length=20)
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+
+    # generic relationship fields -- can react on post, comment, etc
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
+    def __str__(self):
+        return f"Reaction: {self.emoji} | Object: {self.content_object} | User:{self.user.user_name}"
         
