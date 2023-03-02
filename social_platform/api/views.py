@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 # models
-from social_platform.models import Post
+from social_platform.models import Post, Comment, Reaction
 from user.models import User
 
 # serializers
@@ -31,8 +31,9 @@ IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly)
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from user.api.views import get_jwt_access_tokens_for_user
 
-
 from django.core.files.storage import FileSystemStorage
+
+from django.contrib.contenttypes.models import ContentType
 
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
@@ -247,12 +248,30 @@ class CheckFollowership(APIView):
                             status=status.HTTP_417_EXPECTATION_FAILED)
 
 
-class UploadImage(APIView):
-    def post(self, request):
-        f = request.FILES['image']
-        fs = FileSystemStorage()
-        file_name = str(f).split('.')[0]
-        file = fs.save(file_name, f)
-        file_url = fs.url(file)
-        return Response({"success": 1, "file": {"url": file_url}})
+class React(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, model:str, instance_id:int, emoji:str):
+
+        content_type = ContentType.objects.get(model=model.lower())
+        object_reacted_on = content_type.get_object_for_this_type(id=instance_id)
+
+        # Create a new Reaction object for a specific Post/Comment object
+        reaction = Reaction(
+        content_type=content_type,
+        object_id=object_reacted_on.id,
+        content_object=object_reacted_on,
+        user=self.request.user,
+        emoji=emoji
+        )
+        reaction.save()
+
+        response_data = {
+            "reaction": emoji,
+            "model": model,
+            "instance_id": instance_id,
+            "user": self.request.user.user_name
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
         
