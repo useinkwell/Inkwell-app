@@ -8,6 +8,7 @@ urlpatterns = [
     path('post/<int:pk>/', views.PostDetail.as_view(), name='post_detail'),
 
     path('react/<str:model>/<int:instance_id>/<str:emoji>/', views.React.as_view(), name='react'),
+    path('react/remove/<str:model>/<int:instance_id>/<str:emoji>/', views.UnReact.as_view(), name='unreact'),
     
     path('membership/<int:pk>/', views.MembershipForUsername.as_view(), name='membership_username'),
     path('membership/', views.Membership.as_view(), name='membership'),

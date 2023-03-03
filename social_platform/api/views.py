@@ -281,3 +281,21 @@ class React(APIView):
         }
         return Response(response_data, status=status.HTTP_200_OK)
         
+
+class UnReact(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, model:str, instance_id:int, emoji:str):
+
+        content_type = ContentType.objects.get(model=model.lower())
+        object_reacted_on = content_type.get_object_for_this_type(id=instance_id)
+
+        reaction = Reaction.objects.get(object_id=object_reacted_on.pk)
+        reaction.delete()        
+
+        response_data = {
+            "removed reaction": emoji
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+        
