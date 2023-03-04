@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from social_platform.models import Post, Comment
+from social_platform.models import Post, Comment, Reaction
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -11,6 +11,16 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = '__all__'
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
+        
+
+class ReactionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reaction
+        fields = ['emoji', 'user']
         extra_kwargs = {
             'user': {'read_only': True}
         }
