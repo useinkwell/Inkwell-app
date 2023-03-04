@@ -312,6 +312,8 @@ class UnReact(APIView):
 
 class ReactList(APIView):
 
+    permission_classes = []
+
     def get(self, request, model:str, instance_id:int):
 
         content_type = ContentType.objects.get(model=model.lower())

@@ -25,12 +25,15 @@ class Post(models.Model):
 
 class Comment(models.Model):
     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, null=False, on_delete=models.CASCADE)
-    body = models.TextField(null=False)
+    post = models.ForeignKey(Post, null=False, on_delete=models.CASCADE,
+                    related_name='comments')
+    parent_comment = models.ForeignKey('self', null=True, blank=True,
+                    on_delete=models.CASCADE, related_name='child_comments')
+    content = models.TextField(null=False)
     date_posted = models.DateTimeField(null=False, default=timezone.now)
 
     def __str__(self):
-        return f"Comment('{self.user.user_name}', '{self.body}')"
+        return f"Comment('{self.user.user_name}', '{self.content}')"
 
 
 class Reaction(models.Model):
