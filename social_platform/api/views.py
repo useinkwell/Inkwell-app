@@ -7,7 +7,7 @@ from social_platform.models import Post, Comment, Reaction
 from user.models import User
 
 # serializers
-from .serializers import PostSerializer
+from .serializers import PostSerializer, ReactionSerializer
 from user.api.serializers import UserSerializer
 
 # response / status
@@ -289,13 +289,43 @@ class UnReact(APIView):
     def post(self, request, model:str, instance_id:int, emoji:str):
 
         content_type = ContentType.objects.get(model=model.lower())
+        
         object_reacted_on = content_type.get_object_for_this_type(id=instance_id)
 
-        reaction = Reaction.objects.get(object_id=object_reacted_on.pk)
-        reaction.delete()        
+        try:
+            reaction = Reaction.objects.get(content_type=content_type,
+                                            object_id=object_reacted_on.pk, 
+                                            emoji=emoji, user=self.request.user)
+
+        except Reaction.DoesNotExist:
+            return Response({"error": "no such reaction"},
+                                status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            reaction.delete()        
 
         response_data = {
             "removed reaction": emoji
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+
+class ReactList(APIView):
+
+    def get(self, request, model:str, instance_id:int):
+
+        content_type = ContentType.objects.get(model=model.lower())
+        object_reacted_on = content_type.get_object_for_this_type(id=instance_id)
+
+        reactions = Reaction.objects.filter(content_type=content_type, 
+                        object_id=instance_id).all()
+
+        serializer = ReactionSerializer(reactions, many=True)
+
+        response_data = {
+            "model": model,
+            "instance_id": instance_id,
+            "reactions": serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
         
