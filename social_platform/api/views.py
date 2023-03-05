@@ -7,7 +7,7 @@ from social_platform.models import Post, Comment, Reaction
 from user.models import User
 
 # serializers
-from .serializers import PostSerializer, ReactionSerializer
+from .serializers import PostSerializer, ReactionSerializer, CommentSerializer
 from user.api.serializers import UserSerializer
 
 # response / status
@@ -330,4 +330,46 @@ class ReactList(APIView):
             "reactions": serializer.data
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
+                                                    generics.GenericAPIView):
+    permission_classes = [IsAuthenticatedElseReadOnly]
+
+    serializer_class = CommentSerializer
+    ordering = 'id'
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            post_id = self.kwargs['pk']
+            post = Post.objects.get(pk=post_id)        
+            parent_comment_id = self.request.GET.get('parent_comment')
+            if parent_comment_id:
+                parent_comment = Comment.objects.get(id=parent_comment_id)
+            else:
+                parent_comment = None
+            content = self.request.GET.get('content')
+        except Comment.DoesNotExist:
+            return Response({"error": "invalid parent comment id"}, 
+                                            status=status.HTTP_404_NOT_FOUND)
+        
+        new_comment = Comment.objects.create(
+            user=self.request.user,
+            post=post,
+            parent_comment=parent_comment,
+            content=content
+        )            
+
+        serializer = CommentSerializer(new_comment)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        post_id = self.kwargs['pk']
+        post = Post.objects.get(pk=post_id)
+        comments = post.comments.order_by(CommentList.ordering).all()
+        return comments
         

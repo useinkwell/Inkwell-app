@@ -24,4 +24,14 @@ class ReactionSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'user': {'read_only': True}
         }
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
         
