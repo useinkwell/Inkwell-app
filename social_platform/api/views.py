@@ -5,6 +5,7 @@ from django.conf import settings
 # models
 from social_platform.models import Post, Comment, Reaction
 from user.models import User
+from django.contrib.contenttypes.models import ContentType
 
 # serializers
 from .serializers import PostSerializer, ReactionSerializer, CommentSerializer
@@ -31,15 +32,18 @@ IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly)
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from user.api.views import get_jwt_access_tokens_for_user
 
+# Static/Media
 from django.core.files.storage import FileSystemStorage
 
-from django.contrib.contenttypes.models import ContentType
+# pagination
+from .pagination import PostPaginationConfig, CommentPaginationConfig
 
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
 
     permission_classes = [IsAuthenticatedElseReadOnly]
+    pagination_class = PostPaginationConfig
     ordering = '-id'
 
     serializer_class = PostSerializer
@@ -120,8 +124,8 @@ class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
 
     
 class Membership(APIView):
-
-    permission_classes = [IsAuthenticated]        
+    
+    permission_classes = [IsAuthenticated]       
 
     def get(self, request):
     
@@ -335,6 +339,7 @@ class ReactList(APIView):
 class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                     generics.GenericAPIView):
     permission_classes = [IsAuthenticatedElseReadOnly]
+    pagination_class = CommentPaginationConfig
 
     serializer_class = CommentSerializer
     ordering = 'id'
