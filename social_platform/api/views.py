@@ -388,3 +388,21 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
         comments = post.comments.order_by(CommentList.ordering).all()
         return comments
         
+
+class CommentDetail(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+ mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+
+    # permission_classes = [CommentOwnerElseReadOnly] (to be implemented)
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+        
