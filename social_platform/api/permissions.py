@@ -29,3 +29,15 @@ class IsPostAuthorElseReadOnly(permissions.BasePermission):
 
         user_permission = request.user and obj.user == request.user
         return user_permission or request.user.is_staff
+
+
+class IsReactorElseReadOnly(IsPostAuthorElseReadOnly):
+    '''The request allows full access if user is the Reactor, else it only
+    allows read-only access'''
+    pass
+
+
+class IsCommentAuthorElseReadOnly(IsPostAuthorElseReadOnly):
+    '''The request allows full access if user is the CommentAuthor, else it only
+    allows read-only access'''
+    pass

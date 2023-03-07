@@ -26,7 +26,8 @@ from django.contrib.auth import authenticate, login
 
 # permissions
 from .permissions import (IsAdmin, IsAuthenticated, IsAdminElseReadOnly,
-IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly)
+IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly, IsReactorElseReadOnly,
+IsCommentAuthorElseReadOnly)
 
 # jwt authentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -288,12 +289,12 @@ class React(APIView):
 
 class UnReact(APIView):
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes: permission is tied to the logic for this view. Only 
+    # user who reacted on an object can remove the reaction.
 
     def post(self, request, model:str, instance_id:int, emoji:str):
 
-        content_type = ContentType.objects.get(model=model.lower())
-        
+        content_type = ContentType.objects.get(model=model.lower())        
         object_reacted_on = content_type.get_object_for_this_type(id=instance_id)
 
         try:
@@ -302,7 +303,8 @@ class UnReact(APIView):
                                             emoji=emoji, user=self.request.user)
 
         except Reaction.DoesNotExist:
-            return Response({"error": "no such reaction"},
+            return Response(
+                {"error": f"no '{emoji}' reaction from current user on this {model}"},
                                 status=status.HTTP_404_NOT_FOUND)
 
         else:
@@ -316,6 +318,7 @@ class UnReact(APIView):
 
 class ReactList(APIView):
 
+    # no permissions required for this view
     permission_classes = []
 
     def get(self, request, model:str, instance_id:int):
@@ -392,7 +395,7 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
 class CommentDetail(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
  mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
 
-    # permission_classes = [CommentOwnerElseReadOnly] (to be implemented)
+    permission_classes = [IsCommentAuthorElseReadOnly]
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
