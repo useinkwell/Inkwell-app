@@ -48,4 +48,14 @@ class Reaction(models.Model):
 
     def __str__(self):
         return f"Reaction: {self.emoji} | Object: {self.content_object} | User:{self.user.user_name}"
-        
+
+
+class Activity(models.Model):
+
+    datetime = models.DateTimeField(default=timezone.now)
+
+    # can be Post, Comment, Reaction, User
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    
