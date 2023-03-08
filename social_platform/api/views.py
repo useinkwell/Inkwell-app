@@ -39,6 +39,9 @@ from django.core.files.storage import FileSystemStorage
 # pagination
 from .pagination import PostPaginationConfig, CommentPaginationConfig
 
+# signals
+from social_platform.signals import new_following
+
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
@@ -208,10 +211,21 @@ class FollowUser(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    def send_follow_signal(self, follow_recipient):
+        new_following.send(
+        sender=self.__class__,
+        instance=self.request.user,
+        follow_recipient=follow_recipient,
+        created=False)
+
     def post(self, request, username):
         user_to_follow = User.objects.filter(user_name=username).first()
         if user_to_follow:
             user_to_follow.followers.add(self.request.user)
+
+            # send signal to create follower activity
+            FollowUser.send_follow_signal(self, user_to_follow)
+
             return Response({'followed user': username}, 
                                 status=status.HTTP_200_OK)
         return Response({"error": "couldn't follow user"},

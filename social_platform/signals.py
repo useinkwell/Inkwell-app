@@ -6,6 +6,13 @@ from .models import Post, Comment, Reaction, Activity
 from django.contrib.contenttypes.models import ContentType
 
 
+# custom signals
+import django.dispatch
+new_following = django.dispatch.Signal()
+
+
+
+
 # ----EXAMPLE----
 # <sender> points to the model to listen to. None by default, meaning it listens to all.
 @receiver(request_finished, sender=None, dispatch_uid='unique-string-to-protect-against-duplicate-signal')
@@ -13,7 +20,7 @@ def my_callback(sender, **kwargs):
     print(f'\n\n\nEXECUTED SIGNAL:  Request Finished!!!\n\n\n')
 
 
-# TODO: add a custom signal here for followership since no model instance is created
+@receiver(new_following, sender=None, dispatch_uid='follow-uid')
 @receiver(post_save, sender=Post, dispatch_uid='post-uid')
 @receiver(post_save, sender=Comment, dispatch_uid='comment-uid')
 @receiver(post_save, sender=Reaction, dispatch_uid='reaction-uid')
