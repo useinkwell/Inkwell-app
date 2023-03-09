@@ -54,8 +54,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     bio = models.CharField(max_length=500, null=False, default="nothing to see here")
     membership = models.CharField(max_length=20, null=False, default="Basic")
 
-    followers = models.ManyToManyField('self', related_name='following', symmetrical=False, blank=True)
-
     USERNAME_FIELD = 'email'    
     REQUIRED_FIELDS = ['user_name', 'first_name', 'last_name']
     objects = AccountManager()

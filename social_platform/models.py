@@ -50,6 +50,15 @@ class Reaction(models.Model):
         return f"Reaction: {self.emoji} | Object: {self.content_object} | User:{self.user.user_name}"
 
 
+class Following(models.Model):
+
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+
+    def __str__(self):
+        return f"Following: {self.follower} -> {self.following}"
+
+
 class Activity(models.Model):
 
     datetime = models.DateTimeField(default=timezone.now)

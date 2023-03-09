@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 # models
-from social_platform.models import Post, Comment, Reaction
+from social_platform.models import Post, Comment, Reaction, Following
 from user.models import User
 from django.contrib.contenttypes.models import ContentType
 
@@ -206,29 +206,43 @@ class AccountInfoForUsername(APIView):
             }
         return Response(response_data)
 
-    
-class FollowUser(APIView):
 
+class FollowUser(APIView):
     permission_classes = [IsAuthenticated]
 
-    def send_follow_signal(self, follow_recipient):
+
+    def send_follow_signal(self, instance, newly_created):
         new_following.send(
         sender=self.__class__,
-        instance=self.request.user,
-        follow_recipient=follow_recipient,
-        created=False)
+        instance=instance,
+        created=newly_created)
+
 
     def post(self, request, username):
         user_to_follow = User.objects.filter(user_name=username).first()
         if user_to_follow:
-            user_to_follow.followers.add(self.request.user)
+
+            if user_to_follow == self.request.user:
+                return Response(
+                    {"error": "can't follow self"}, 
+                                status=status.HTTP_417_EXPECTATION_FAILED)
+
+            following_instance, newly_created = Following.objects.get_or_create(
+                follower=self.request.user,
+                following=user_to_follow
+            )
 
             # send signal to create follower activity
-            FollowUser.send_follow_signal(self, user_to_follow)
+            if newly_created:
+                FollowUser.send_follow_signal(
+                    self, instance=following_instance, newly_created=True)
 
-            return Response({'followed user': username}, 
-                                status=status.HTTP_200_OK)
-        return Response({"error": "couldn't follow user"},
+                return Response({'followed user': username}, 
+                                    status=status.HTTP_200_OK)
+            else:
+                return Response({'user already follwed': username}, 
+                                    status=status.HTTP_208_ALREADY_REPORTED)
+        return Response({"error": "specified user doesn't exist"},
                                 status=status.HTTP_417_EXPECTATION_FAILED)
 
 
@@ -239,11 +253,20 @@ class UnfollowUser(APIView):
     def post(self, request, username):
         user_to_unfollow = User.objects.filter(user_name=username).first()
         if user_to_unfollow:
-            user_to_unfollow.followers.remove(self.request.user)
+            try:
+                follow_relationship = Following.objects.filter(
+                    follower=self.request.user,
+                    following=user_to_unfollow).first()
+                
+                follow_relationship.delete()
+            except AttributeError:
+                return Response({"error": "currently not following user"},
+                                status=status.HTTP_417_EXPECTATION_FAILED)
             return Response({'unfollowed user': username},
                                                 status=status.HTTP_200_OK)
-        return Response({"error": "couldn't unfollow user"},
+        return Response({"error": "user specified doesn't exist"},
                                 status=status.HTTP_417_EXPECTATION_FAILED)
+
 
 
 class CheckFollowership(APIView):
@@ -254,13 +277,17 @@ class CheckFollowership(APIView):
         other_user = User.objects.filter(user_name=username).first()
         if other_user:
             current_user_follows_other = \
-                            self.request.user in other_user.followers.all()
+                            Following.objects.filter(
+                                follower=self.request.user,
+                                following=other_user).first()
             other_user_follows_current = \
-                            other_user in self.request.user.followers.all()
+                            Following.objects.filter(
+                                follower=other_user,
+                                following=self.request.user).first()
 
             followership = {
-                'current_user_follows_other': current_user_follows_other,
-                'other_user_follows_current': other_user_follows_current
+                'current_user_follows_other': bool(current_user_follows_other),
+                'other_user_follows_current': bool(other_user_follows_current)
             }
             return Response(followership, status=status.HTTP_200_OK)
         return Response({"error": "couldn't fetch other user"},
