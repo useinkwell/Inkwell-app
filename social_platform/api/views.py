@@ -232,7 +232,7 @@ class FollowUser(APIView):
             # send signal to create follower activity
             if newly_created:
                 FollowUser.send_follow_signal(
-                    self, instance=following_instance, newly_created=newly_created)
+                    self, instance=following_instance, newly_created=True)
 
                 return Response({'followed user': username}, 
                                     status=status.HTTP_200_OK)
