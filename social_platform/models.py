@@ -56,7 +56,7 @@ class Following(models.Model):
     following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
 
     def __str__(self):
-        return f"Following> {self.follower} -> {self.following}"
+        return f"Following: {self.follower} -> {self.following}"
 
 
 class Activity(models.Model):

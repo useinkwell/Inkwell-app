@@ -30,15 +30,13 @@ def my_callback(sender, **kwargs):
 def activity_listener(sender, **kwargs):
     model_instance = kwargs.get('instance')
     newly_created = kwargs.get('created')
-    print(kwargs)
 
     model_name = type(model_instance).__name__
     content_type = ContentType.objects.get(model=model_name.lower())
     model_class = content_type.model_class()
 
-    # only create an activity instance IF this activity is fresh content
-    # (new post, new comment, new reaction). Exception would be made for new
-    # follower activity, since no new model instance is created by it
+    # only create an activity instance IF this activity is fresh (new post, 
+    # new comment, new reaction, new following).
     if newly_created:
         # create activity for this reaction
         activity = Activity(

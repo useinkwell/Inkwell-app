@@ -210,31 +210,36 @@ class AccountInfoForUsername(APIView):
 class FollowUser(APIView):
     permission_classes = [IsAuthenticated]
 
-    def send_follow_signal(self, follow_recipient):
+    def send_follow_signal(self, instance, newly_created):
         new_following.send(
         sender=self.__class__,
-        instance=self.request.user,
-        follow_recipient=follow_recipient,
-        created=False)
+        instance=instance,
+        created=newly_created)
 
     def post(self, request, username):
         user_to_follow = User.objects.filter(user_name=username).first()
         if user_to_follow:
-            follow_relationship, newly_created = Following.objects.get_or_create(
+            if user_to_follow == self.request.user:
+                return Response(
+                    {"error": "can't follow self"}, 
+                                status=status.HTTP_417_EXPECTATION_FAILED)
+
+            following_instance, newly_created = Following.objects.get_or_create(
                 follower=self.request.user,
                 following=user_to_follow
             )
 
             # send signal to create follower activity
             if newly_created:
-                FollowUser.send_follow_signal(self, user_to_follow)
+                FollowUser.send_follow_signal(
+                    self, instance=following_instance, newly_created=newly_created)
 
                 return Response({'followed user': username}, 
                                     status=status.HTTP_200_OK)
             else:
                 return Response({'user already follwed': username}, 
                                     status=status.HTTP_208_ALREADY_REPORTED)
-        return Response({"error": "couldn't follow user"},
+        return Response({"error": "specified user doesn't exist"},
                                 status=status.HTTP_417_EXPECTATION_FAILED)
 
 
