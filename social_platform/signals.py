@@ -1,14 +1,17 @@
+# inbuilt django signals
 from django.core.signals import request_finished
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
-from django.dispatch import receiver
-
-from .models import Post, Comment, Reaction, Activity
-from django.contrib.contenttypes.models import ContentType
-
 
 # custom signals
 import django.dispatch
 new_following = django.dispatch.Signal()
+
+# decorator for receiving signals
+from django.dispatch import receiver
+
+# models
+from .models import Post, Comment, Reaction, Activity
+from django.contrib.contenttypes.models import ContentType
 
 
 
@@ -31,6 +34,7 @@ def activity_listener(sender, **kwargs):
 
     model_name = type(model_instance).__name__
     content_type = ContentType.objects.get(model=model_name.lower())
+    model_class = content_type.model_class()
 
     # only create an activity instance IF this activity is fresh content
     # (new post, new comment, new reaction). Exception would be made for new
