@@ -265,6 +265,29 @@ class UnfollowUser(APIView):
                                 status=status.HTTP_417_EXPECTATION_FAILED)
 
 
+class ListFollowers(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        followers_object = self.request.user.followers.all()
+        followers = map(lambda follower_instance: \
+            follower_instance.follower.user_name, followers_object)
+        data = {"followers": followers}
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class ListFollowing(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        following_object = self.request.user.following.all()
+        following = map(lambda following_instance: \
+            following_instance.following.user_name, following_object)
+        data = {"following": following}
+        return Response(data, status=status.HTTP_200_OK)
+
 
 class CheckFollowership(APIView):
 
