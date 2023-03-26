@@ -1,5 +1,5 @@
 """
-ASGI config for core project.
+ASGI config for djangochat project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,20 @@ import os
 
 from django.core.asgi import get_asgi_application
 
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+
+# <async app>.routing    (routing.py)
+import social_platform.routing
+
+						            # <project name>.settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            social_platform.routing.websocket_urlpatterns
+        )
+    )
+})
