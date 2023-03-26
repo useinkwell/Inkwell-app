@@ -85,5 +85,15 @@ class Following(models.Model):
         return f"Following{self.id}: {self.follower} -> {self.following}"
         
         
-
+class Notification(models.Model):
     
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=100)
+    is_seen = models.BooleanField(default=False)
+    event_url = models.CharField(max_length=200, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+
+    def __str__(self):
+        return f"Notification{self.id} | {self.user.user_name}: {self.message}"
+        
