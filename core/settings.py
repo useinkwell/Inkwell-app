@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'django_editorjs',
+    'channels',
     
     'user',
     'social_platform'
@@ -78,7 +79,17 @@ TEMPLATES = [
     },
 ]
 
+
+# asgi/django-channels configs for websocket communication
+
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 
 # Database
