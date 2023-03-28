@@ -42,6 +42,11 @@ from .pagination import PostPaginationConfig, CommentPaginationConfig
 # signals
 from social_platform.signals import new_following
 
+# channel_layer for sending notification via websocket
+from asgiref.sync import sync_to_async, async_to_sync
+from channels.layers import get_channel_layer
+channel_layer = get_channel_layer()
+
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                                                 generics.GenericAPIView):
