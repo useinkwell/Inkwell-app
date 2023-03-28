@@ -46,6 +46,7 @@ from social_platform.signals import new_following
 from asgiref.sync import sync_to_async, async_to_sync
 from channels.layers import get_channel_layer
 channel_layer = get_channel_layer()
+# channel_layer = async_to_sync(channel_layer.new_channel)()
 
 
 class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
@@ -73,7 +74,7 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
         if serializer.is_valid():
             # create a post instance using the POST data
             post = Post(**data)
-            post.save()
+            post.save()            
 
             valid_data = serializer.data
 
@@ -84,6 +85,20 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
             stored_file = file_storage.save(file_name, request_file_object)
             file_url = file_storage.url(stored_file)
             valid_data["file"] = {"url": file_url}
+
+
+            # notify followers of new post
+            user_name = self.request.user.user_name        
+            async_to_sync(channel_layer.group_send)(
+                f'follows_{user_name}',
+                {
+                    'type': 'notification',
+                    'action': 'post',
+                    'action_id': post.id,
+                    'by': user_name,
+                    'message': f'{user_name} made a new post'
+                }
+            )
 
             return Response(valid_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
