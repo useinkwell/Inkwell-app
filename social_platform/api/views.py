@@ -254,6 +254,21 @@ class FollowUser(APIView):
                 FollowUser.send_follow_signal(
                     self, instance=following_instance, newly_created=True)
 
+
+                # notify followed user of new following
+                sender_name = self.request.user.user_name      
+                async_to_sync(channel_layer.group_send)(
+                    f'user_{user_to_follow.user_name}',
+                    {
+                        'type': 'notification',
+                        'action': 'following',
+                        'action_id': following_instance.id,
+                        'by': sender_name,
+                        'message': f'{sender_name} followed you'
+                    }
+                )
+
+
                 return Response({'followed user': username}, 
                                     status=status.HTTP_200_OK)
             else:
