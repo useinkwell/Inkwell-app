@@ -374,6 +374,30 @@ class React(APIView):
         )
         reaction.save()
 
+
+        # notify content creator of reaction
+        
+        user_name = user.user_name
+        content_creator_name = object_reacted_on.user.user_name
+        model_name = type(object_reacted_on).__name__.lower()
+
+        # ensure that notification is not sent for reacting to your own content
+        if content_creator_name != user_name:
+
+            async_to_sync(channel_layer.group_send)(
+                f'user_{content_creator_name}',
+                {
+                    'type': 'notification',
+                    'action': 'reaction',
+                    'action_id': reaction.id,
+                    'action_content': emoji,
+                    'receiver': model_name,
+                    'receiver_id': object_reacted_on.id,
+                    'by': user_name,
+                    'message': f'{user_name} reacted on your {model_name}'
+                }
+            )
+
         response_data = {
             "reaction": emoji,
             "model": model,

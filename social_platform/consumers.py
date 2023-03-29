@@ -50,8 +50,12 @@ class ClientConsumer(AsyncWebsocketConsumer):
         action = event['action']
         action_id = event['action_id']
         by = event['by']
+        action_content = event.get('action_content')
+        receiver = event.get('receiver')
+        receiver_id = event.get('receiver_id')
         
         sender = await sync_to_async(User.objects.get)(user_name=by)
+
 
         # create notification instance for all concerned users
 
@@ -78,11 +82,27 @@ class ClientConsumer(AsyncWebsocketConsumer):
                 message=message
             )
 
+        
+        @sync_to_async
+        def create_reaction_notification_instance():
+            '''creates a notification instance for content creator of the
+            object reacted on'''
+            user_name = self.scope['url_route']['kwargs']['user_name']
+            user = User.objects.get(user_name=user_name)
+            Notification.objects.create(
+                user=user,
+                message=message
+            )
+
+
         if action == 'post':
             await create_post_notification_instances()
 
         elif action == 'following':
             await create_following_notification_instance()
+
+        elif action == 'reaction':
+            await create_reaction_notification_instance()
         
 
         # send notification to client via websocket
