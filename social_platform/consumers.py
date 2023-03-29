@@ -50,23 +50,39 @@ class ClientConsumer(AsyncWebsocketConsumer):
         action = event['action']
         action_id = event['action_id']
         by = event['by']
+        
+        sender = await sync_to_async(User.objects.get)(user_name=by)
 
         # create notification instance for all concerned users
-        sender = await sync_to_async(User.objects.get)(user_name=by)
 
         @sync_to_async
         def create_post_notification_instances():
+            '''creates a notification instance for each follower'''
             followers_object = sender.followers.all()
-            followers = list(map(lambda follower_instance: \
-            follower_instance.follower, followers_object))
+            followers = map(lambda follower_instance: \
+            follower_instance.follower, followers_object)
             notifications = [Notification(
                     message=message,
                     user=follower
                     ) for follower in followers]
             Notification.objects.bulk_create(notifications)
 
+        
+        @sync_to_async
+        def create_following_notification_instance():
+            '''creates a notification instance for the followed user'''
+            user_name = self.scope['url_route']['kwargs']['user_name']
+            user = User.objects.get(user_name=user_name)
+            Notification.objects.create(
+                user=user,
+                message=message
+            )
+
         if action == 'post':
             await create_post_notification_instances()
+
+        elif action == 'following':
+            await create_following_notification_instance()
         
 
         # send notification to client via websocket
