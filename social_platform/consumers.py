@@ -94,6 +94,19 @@ class ClientConsumer(AsyncWebsocketConsumer):
                 message=message
             )
 
+        
+        @sync_to_async
+        def create_comment_notification_instance():
+            '''creates a notification instance for user who posted or commented,
+            when the post is commented on or the comment is replied to'''
+
+            user_name = self.scope['url_route']['kwargs']['user_name']
+            user = User.objects.get(user_name=user_name)
+            Notification.objects.create(
+                user=user,
+                message=message
+            )
+
 
         if action == 'post':
             await create_post_notification_instances()
@@ -103,6 +116,9 @@ class ClientConsumer(AsyncWebsocketConsumer):
 
         elif action == 'reaction':
             await create_reaction_notification_instance()
+
+        elif action == 'comment':
+            await create_comment_notification_instance()
         
 
         # send notification to client via websocket
