@@ -95,7 +95,7 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
                     'type': 'notification',
                     'action': 'post',
                     'action_id': post.id,
-                    'by': user_name,
+                    'by_user': user_name,
                     'message': f'{user_name} made a new post'
                 }
             )
@@ -263,7 +263,7 @@ class FollowUser(APIView):
                         'type': 'notification',
                         'action': 'following',
                         'action_id': following_instance.id,
-                        'by': sender_name,
+                        'by_user': sender_name,
                         'message': f'{sender_name} followed you'
                     }
                 )
@@ -391,9 +391,9 @@ class React(APIView):
                     'action': 'reaction',
                     'action_id': reaction.id,
                     'action_content': emoji,
-                    'receiver': model_name,
-                    'receiver_id': object_reacted_on.id,
-                    'by': user_name,
+                    'affected': model_name,
+                    'affected_id': object_reacted_on.id,
+                    'by_user': user_name,
                     'message': f'{user_name} reacted on your {model_name}'
                 }
             )
@@ -510,12 +510,12 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
         if parent_comment == None:
             content_creator_name = post.user.user_name
             model_name = type(post).__name__.lower()
-            receiver_id = post.id
+            affected_id = post.id
             comment_or_reply_modifier = 'commented on'
         else:
             content_creator_name = parent_comment.user.user_name
             model_name = type(parent_comment).__name__.lower()
-            receiver_id = parent_comment.id
+            affected_id = parent_comment.id
             comment_or_reply_modifier = 'replied to'
 
         if user.gender == 'male':
@@ -543,9 +543,9 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
                         'action': 'comment',
                         'action_id': new_comment.id,
                         'action_content': new_comment.content,
-                        'receiver': model_name,
-                        'receiver_id': receiver_id,
-                        'by': user.user_name,
+                        'affected': model_name,
+                        'affected_id': affected_id,
+                        'by_user': user.user_name,
                         'message': f'{user.user_name} {comment_or_reply_modifier} your {model_name}' + comment_location_clause
                     }
                 )

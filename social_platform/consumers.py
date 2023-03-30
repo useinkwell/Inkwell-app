@@ -49,18 +49,18 @@ class ClientConsumer(AsyncWebsocketConsumer):
         message = event['message']
         action = event['action']
         action_id = event['action_id']
-        by = event['by']
+        by_user = event['by_user']
         action_content = event.get('action_content')
-        receiver = event.get('receiver')
-        receiver_id = event.get('receiver_id')
+        affected = event.get('affected')
+        affected_id = event.get('affected_id')
         
-        sender = await sync_to_async(User.objects.get)(user_name=by)
+        sender = await sync_to_async(User.objects.get)(user_name=by_user)
 
 
         # create notification instance for all concerned users
 
         @sync_to_async
-        def create_post_notification_instances():
+        def create_bulk_follower_notification_instances():
             '''creates a notification instance for each follower'''
             followers_object = sender.followers.all()
             followers = map(lambda follower_instance: \
@@ -73,33 +73,8 @@ class ClientConsumer(AsyncWebsocketConsumer):
 
         
         @sync_to_async
-        def create_following_notification_instance():
-            '''creates a notification instance for the followed user'''
-            user_name = self.scope['url_route']['kwargs']['user_name']
-            user = User.objects.get(user_name=user_name)
-            Notification.objects.create(
-                user=user,
-                message=message
-            )
-
-        
-        @sync_to_async
-        def create_reaction_notification_instance():
-            '''creates a notification instance for content creator of the
-            object reacted on'''
-            user_name = self.scope['url_route']['kwargs']['user_name']
-            user = User.objects.get(user_name=user_name)
-            Notification.objects.create(
-                user=user,
-                message=message
-            )
-
-        
-        @sync_to_async
-        def create_comment_notification_instance():
-            '''creates a notification instance for user who posted or commented,
-            when the post is commented on or the comment is replied to'''
-
+        def create_single_user_notification_instance():
+            '''creates a notification instance for a single user'''
             user_name = self.scope['url_route']['kwargs']['user_name']
             user = User.objects.get(user_name=user_name)
             Notification.objects.create(
@@ -109,16 +84,10 @@ class ClientConsumer(AsyncWebsocketConsumer):
 
 
         if action == 'post':
-            await create_post_notification_instances()
+            await create_bulk_follower_notification_instances()
 
-        elif action == 'following':
-            await create_following_notification_instance()
-
-        elif action == 'reaction':
-            await create_reaction_notification_instance()
-
-        elif action == 'comment':
-            await create_comment_notification_instance()
+        elif action == 'following' or action == 'reaction' or action == 'comment':
+            await create_single_user_notification_instance()
         
 
         # send notification to client via websocket
@@ -127,9 +96,12 @@ class ClientConsumer(AsyncWebsocketConsumer):
                 'message': message,
                 'action': action,
                 'action_id': action_id,
-                'by': by
+                'by_user': by_user,
+                'action_content': action_content,
+                'affected': affected,
+                'affected_id': affected_id
             }
-        ))    
+        ))  
 
     
     @sync_to_async
