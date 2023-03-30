@@ -494,14 +494,54 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
                 {"error": f"post (id={post_id}) and parent_comment (post_id={parent_comment.post.pk}) do not match!"},
                                             status=status.HTTP_400_BAD_REQUEST)
         
+        user = self.request.user
+        
         new_comment = Comment.objects.create(
-            user=self.request.user,
+            user=user,
             post=post,
             parent_comment=parent_comment,
             content=content
         )            
 
         serializer = CommentSerializer(new_comment)
+
+        # notify post/parent comment creator of comment/reply
+
+        if parent_comment == None:
+            content_creator_name = post.user.user_name
+            model_name = type(post).__name__.lower()
+            receiver_id = post.id
+            comment_or_reply_modifier = 'commented on'
+        else:
+            content_creator_name = parent_comment.user.user_name
+            model_name = type(parent_comment).__name__.lower()
+            receiver_id = parent_comment.id
+            comment_or_reply_modifier = 'replied to'
+
+        if user == post.user:
+            poster_reference = '<gender pronoun>'   # his/her
+        else:
+            poster_reference = post.user.user_name + "'s"
+
+        comment_location_clause = ''
+        if parent_comment and parent_comment.user != post.user:
+            comment_location_clause =  f' on {poster_reference} post'
+
+        # only send notification if commenter isn't commenting to their own content
+        if content_creator_name != user.user_name:
+            async_to_sync(channel_layer.group_send)(
+                    f'user_{content_creator_name}',
+                    {
+                        'type': 'notification',
+                        'action': 'comment',
+                        'action_id': new_comment.id,
+                        'action_content': new_comment.content,
+                        'receiver': model_name,
+                        'receiver_id': receiver_id,
+                        'by': user.user_name,
+                        'message': f'{user.user_name} {comment_or_reply_modifier} your {model_name}' + comment_location_clause
+                    }
+                )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
