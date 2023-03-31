@@ -41,3 +41,13 @@ class IsCommentAuthorElseReadOnly(IsPostAuthorElseReadOnly):
     '''The request allows full access if user is the CommentAuthor, else it only
     allows read-only access'''
     pass
+
+
+class IsNotificationRecipient(permissions.BasePermission):
+    '''The request only allows access if user is the recipient, else it doesn't 
+    allow access at all'''
+    def has_object_permission(self, request, view, obj):
+        user_permission = request.user and obj.user == request.user
+        return user_permission or request.user.is_staff
+        
+
