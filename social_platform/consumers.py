@@ -5,24 +5,42 @@ import json
 from user.models import User
 from social_platform.models import Notification
 
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import InvalidToken
+
+
+@sync_to_async
+def verify_token(token):
+    try:
+        access_token = AccessToken(token)
+        return access_token
+    except InvalidToken:
+        return None
+
 
 class ClientConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        user_name = self.scope['url_route']['kwargs']['user_name']
+        user_access_token = self.scope['url_route']['kwargs']['access_token']
+        token_user_data = (await verify_token(user_access_token)).payload
 
-        print(f'socket: {user_name} connected')
+        if token_user_data:
+            user = await sync_to_async(User.objects.get)(id=token_user_data['user_id'])
+            user_name = user.user_name
+            self.scope['session']['user_name'] = user_name
+            await sync_to_async(self.scope['session'].save)()
 
-        # store channel_name in session to be accessible from views
-        self.scope['session']['channel_name'] = self.channel_name
+            # add consumer instance to personal user_name group (e.g user_mary)
+            await self.channel_layer.group_add(f'user_{user_name}', self.channel_name)
 
-        # add consumer instance to personal user_name group (e.g user_mary)
-        await self.channel_layer.group_add(f'user_{user_name}', self.channel_name)
+            # add consumer instance to all groups representing followers of other users
+            # (e.g follows_rihanna, follows_poppy, etc)
+            await self.add_channel_to_group_for_each_followed_user(user_name)
 
-        # add consumer instance to all groups representing followers of other users
-        # (e.g follows_rihanna, follows_poppy, etc)
-        await self.add_channel_to_group_for_each_followed_user(user_name)
+            await self.accept()
+            print(f'\nsocket: {user_name} connected')
 
-        await self.accept()
+        else:
+            await self.close()
 
     
     async def receive(self, text_data=None, bytes_data=None):
@@ -75,8 +93,11 @@ class ClientConsumer(AsyncWebsocketConsumer):
         @sync_to_async
         def create_single_user_notification_instance():
             '''creates a notification instance for a single user'''
-            user_name = self.scope['url_route']['kwargs']['user_name']
+            # user_name = self.scope['url_route']['kwargs']['user_name']
+            # user = User.objects.get(user_name=user_name)
+            user_name = self.scope['session']['user_name']
             user = User.objects.get(user_name=user_name)
+
             Notification.objects.create(
                 user=user,
                 message=message
