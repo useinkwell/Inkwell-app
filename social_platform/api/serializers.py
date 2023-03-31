@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from social_platform.models import Post, Comment, Reaction
+from social_platform.models import Post, Comment, Reaction, Notification
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -34,4 +34,16 @@ class CommentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'user': {'read_only': True}
         }
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'message': {'read_only': True}
+        }
+        
         

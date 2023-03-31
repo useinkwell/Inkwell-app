@@ -25,4 +25,7 @@ urlpatterns = [
     path('following/check/<str:username>/', views.CheckFollowership.as_view(), name='check_followership'),
     path('following/followers/', views.ListFollowers.as_view(), name='list_followers'),
     path('following/followed/', views.ListFollowing.as_view(), name='list_following'),
+
+    path('notification/', views.NotificationList.as_view(), name='notification_list'),
+    path('notification/<int:pk>/', views.NotificationDetail.as_view(), name='notification_detail'),
 ]

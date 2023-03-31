@@ -3,12 +3,13 @@ import json
 from django.conf import settings
 
 # models
-from social_platform.models import Post, Comment, Reaction, Following
+from social_platform.models import Post, Comment, Reaction, Following, Notification
 from user.models import User
 from django.contrib.contenttypes.models import ContentType
 
 # serializers
-from .serializers import PostSerializer, ReactionSerializer, CommentSerializer
+from .serializers import (
+    PostSerializer, ReactionSerializer, CommentSerializer, NotificationSerializer)
 from user.api.serializers import UserSerializer
 
 # response / status
@@ -27,7 +28,7 @@ from django.contrib.auth import authenticate, login
 # permissions
 from .permissions import (IsAdmin, IsAuthenticated, IsAdminElseReadOnly,
 IsAuthenticatedElseReadOnly, IsPostAuthorElseReadOnly, IsReactorElseReadOnly,
-IsCommentAuthorElseReadOnly)
+IsCommentAuthorElseReadOnly, IsNotificationRecipient)
 
 # jwt authentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -37,7 +38,8 @@ from user.api.views import get_jwt_access_tokens_for_user
 from django.core.files.storage import FileSystemStorage
 
 # pagination
-from .pagination import PostPaginationConfig, CommentPaginationConfig
+from .pagination import (
+    PostPaginationConfig, CommentPaginationConfig, NotificationPaginationConfig)
 
 # signals
 from social_platform.signals import new_following
@@ -575,3 +577,39 @@ class CommentDetail(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+class NotificationList(mixins.ListModelMixin, generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = NotificationPaginationConfig
+
+    serializer_class = NotificationSerializer
+    ordering = '-id'
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self, *args, **kwargs):
+        user_notifications = Notification.objects.filter(
+                                        user=self.request.user).order_by(
+                                            NotificationList.ordering).all()
+        return user_notifications
+
+
+class NotificationDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin, generics.GenericAPIView):
+
+    permission_classes = [IsNotificationRecipient]
+
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
