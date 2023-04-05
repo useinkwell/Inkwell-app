@@ -487,7 +487,7 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
                     raise CommentNotForPost
             else:
                 parent_comment = None
-            content = self.request.GET.get('content')
+            content = self.request.POST.get('content')
         except Comment.DoesNotExist:
             return Response({"error": "invalid parent_comment id"}, 
                                             status=status.HTTP_404_NOT_FOUND)
