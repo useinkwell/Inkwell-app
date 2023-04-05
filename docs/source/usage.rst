@@ -30,7 +30,7 @@ Passing data into a request
 The data passed into a request could be any of these 3 types: The request **body**, a **path parameter** or a **query parameter**.
 	- Data passed into the request body is synonymous to the data passed on submitting a html form and can either be *required* (must be provided) or *optional*.
 	- Path parameters are passed in the URl and take the form **/post/<post_id>/** where **post_id** is the parameter in this scenario. Path parameters are mandatory (required) unless specified otherwise.
-	- Query parameters are also passed into the URL and are optional in most cases. They take the form **/posts/?page=2&page_size=10** where **page** and **page_size** are the query parameters in this scenario.
+	- Query parameters are also passed into the URL but unlike the path parameters, query parameters are completely optional. They take the form **/posts/?page=2&page_size=10** where **page** and **page_size** are the query parameters in this scenario.
 
 Authenticating an endpoint
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
