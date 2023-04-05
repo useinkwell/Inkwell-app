@@ -35,11 +35,11 @@ Path Parameters:
 	**post_id** (integer): The id of the existing post under which the comment should belong.
 	
 Query parameters:
-	| **content**: The text message contained in the comment.
-	| **parent_comment** (integer)(optional): The id of the comment which should be its parent, if making a nested comment. This is equivalent to replying to the parent comment, and not directly to the post. If left out, the created comment would be a direct comment under the post itself.
+	**parent_comment** (integer)(optional): The id of the comment which should be its parent, if making a nested comment. This is equivalent to replying to the parent comment, and not directly to the post. If left out, the created comment would be a direct comment under the post itself.
 
 Request Body:
-	Required fields: None.
+	Required fields:
+		**content**: The text message contained in the comment.
 		
 	Optional fields: None.
 	
