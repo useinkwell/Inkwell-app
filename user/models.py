@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(max_length=20)
     date_registered = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
     image_file = models.ImageField(upload_to="profile_pics", null=False, default='default.ico')
     bio = models.CharField(max_length=500, null=False, default="nothing to see here")
