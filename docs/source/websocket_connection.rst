@@ -18,7 +18,7 @@ Here's a simple node script to create a client which can connect to the server v
 	//import the WebSocket package
 	const WebSocket = require('ws');
 
-	//create chatsocket, assuming access_token is 123456789
+	//create socket, assuming access_token is 123456789
 	const notifySocket = new WebSocket('ws://127.0.0.1:8000/ws/123456789/');
 
 
@@ -41,3 +41,37 @@ Here's a simple node script to create a client which can connect to the server v
 
 	console.log('established websocket connection')
 
+
+Although the above example shows how to retreive the 'message' string sent in the websocket data, there's further information sent from the server. Here's a breakdown of each piece of information sent and their underlying usage:
+	- **message**: The default notification message, prepared from the server. e.g "Oliver created a new post".
+	- **action**: The *type* of action the notification represents. e.g **post, comment, reaction, following**
+	- **action_id**: The id of the action (if action is **post**, then this is the post id)
+	- **by_user**: The username of the user who did something to cause the notification (e.g liking someone's comment)
+	- **action_content**: The string content of the action (for cases where content is created by the action -- such as the emoji in a reaction)
+	- **affected**: The *type* of content acted on. ( **post/comment** )
+	- **affected_id**: The id of the content acted on (if affected_id is **comment**, then this is the comment id )
+	
+	As a case study if John reacts to the current authenticated user's comment with a "laugh" emoji, the data received by the client would look like this (assume arbitrary numbers for the IDs):
+	
+	- "message": "John reacted to your comment",
+	- "action": "reaction",
+	- "action_id": "23",
+	- "by_user": "John",
+	- "action_content": "laugh",
+	- "affected": "comment",
+	- "affected_id": "79"
+	
+Using all these info, a custom notification message can be created at the client side (for instance instead of the default "John reacted to your comment", the received details can be used to fetch the emoji from the database and create a more graphically detailed notification).
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+            
+            
+            
