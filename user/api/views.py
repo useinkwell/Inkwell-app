@@ -46,3 +46,5 @@ def get_jwt_access_tokens_for_user(user_instance):
         'access_token': str(refresh_instance.access_token)
     }
     return tokens
+
+
