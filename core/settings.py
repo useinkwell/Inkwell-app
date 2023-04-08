@@ -16,12 +16,17 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c7!06p-2scx&xzr^i%_2n9c9x!sixack9z1$w7g3h!=$9)5wi%'
+SECRET_KEY = os.environ.get('SECRET_KEY')
+CRYPTOGRAPHY_KEY = os.environ.get('CRYPTOGRAPHY_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
