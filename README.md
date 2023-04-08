@@ -23,6 +23,9 @@ to generate one consisting of 64 random characters:
 **import secrets**<br/>
 **key = secrets.token_urlsafe(64)**<br/>
 
+Copy the generated secret key and place in the .env file to look like this:
+> SECRET_KEY=VlVtrWj5XKUlynbezqEypeXSGcPklsuzTS2QWlBk3ijPobVZeTRcY5AOdC_M_iH7NAzG1DNiMkvqDbiKkTIowA
+
 The **CRYPTOGRAPHY_KEY** on the other hand must follow a certain rule to be acceptable.
 It must consist of 32 url-safe base64-encoded bytes. To generate one, simply do:
 
@@ -31,5 +34,8 @@ It must consist of 32 url-safe base64-encoded bytes. To generate one, simply do:
 
 The resulting cryptography key is an encoded string of this form:<br/>
 > b'ap86bphkL5ArilCtU4SP1aHMNfmPQyys8Tt3lnofEJ8='
+
+Copy only the string part and place in the .env file, to look like this:
+> CRYPTOGRAPHY_KEY=ap86bphkL5ArilCtU4SP1aHMNfmPQyys8Tt3lnofEJ8=
     
 
