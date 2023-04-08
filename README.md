@@ -11,3 +11,25 @@ To compile the API Documentation:
 - in your file explorer, go to the build directory --> html and open index.html   (the project root directory --> docs --> build --> html --> index.html)
 
 The full API documentation can be navigated in the browser from there.
+
+<br/>
+
+# Backend
+## Setting up the .env file
+A .env file is used to store the SECRET_KEY and CRYPTOGRAPHY_KEY defined in
+settings.py. The **SECRET_KEY** can be any string of random characters. A quick and easy way
+to generate one consisting of 64 random characters:
+
+**import secrets**<br/>
+**key = secrets.token_urlsafe(64)**<br/>
+
+The **CRYPTOGRAPHY_KEY** on the other hand must follow a certain rule to be acceptable.
+It must consist of 32 url-safe base64-encoded bytes. To generate one, simply do:
+
+**from cryptography.fernet import Fernet**<br/>
+**key = Fernet.generate_key()**
+
+The resulting cryptography key is an encoded string of this form:<br/>
+> b'ap86bphkL5ArilCtU4SP1aHMNfmPQyys8Tt3lnofEJ8='
+    
+
