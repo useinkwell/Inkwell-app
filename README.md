@@ -16,8 +16,18 @@ The full API documentation can be navigated in the browser from there.
 
 # Backend
 ## Setting up the .env file
-A .env file is used to store the SECRET_KEY and CRYPTOGRAPHY_KEY defined in
-settings.py. The **SECRET_KEY** can be any string of random characters. A quick and easy way
+A .env file is used to store the:
+- X_RAPID_API_KEY
+- SECRET_KEY
+- CRYPTOGRAPHY_KEY
+
+The **X_RAPID_API_KEY** is the key gotten by sigining up with rapid api hub and
+is used for the email sending service via sendgrid. Supposing your X_RAPID_API_KEY
+from rapid api hub is 987654321, it would look like this in the .env file:
+> X_RAPID_API_KEY=987654321
+
+The SECRET_KEY and CRYPTOGRAPHY_KEY are defined in settings.py. The 
+**SECRET_KEY** can be any string of random characters. A quick and easy way
 to generate one consisting of 64 random characters:
 
 **import secrets**<br/>
