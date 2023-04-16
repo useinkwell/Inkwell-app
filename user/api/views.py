@@ -5,7 +5,7 @@ from django.conf import settings
 from rest_framework.views import APIView
 
 # models
-from user.models import User
+from user.models import User, InvalidAccessToken
 
 # serializers
 from .serializers import UserSerializer
@@ -136,7 +136,6 @@ class ForgotPassword(APIView):
                 'no-reply@inkwellteam.com',
                 user_email
             )
-            print(f'\n\nPASSWORD RESET TOKEN:{encrypted_access_token.decode()}\n\n')
             return Response(status=status.HTTP_200_OK)
             
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -150,11 +149,21 @@ class ResetPassword(APIView):
     permission_classes = []
     authentication_classes = []
 
+    class InvalidAccessToken(Exception):
+        pass
     
     def get_user(self):
         # the encrypted access token is received here and decoded
         encrypted_access_token = \
-            self.request.GET.get('x_access_token').replace('/','').encode()
+            self.request.GET.get('x_access_token').replace('/','')
+
+        # check/invalidate the encrypted access token to avoid reuse
+        invalidated, newly_created = InvalidAccessToken.objects.get_or_create(
+                    token=encrypted_access_token)
+        if not newly_created:
+            raise self.InvalidAccessToken
+
+        encrypted_access_token = encrypted_access_token.encode()
         access_token = \
             encryption_handler.decrypt(encrypted_access_token).decode()
 
@@ -168,14 +177,27 @@ class ResetPassword(APIView):
     def post(self, request):
         password = self.request.POST.get('password')
         password2 = self.request.POST.get('password2')
-        user = self.get_user()
+        try:
+            user = self.get_user()
+        except self.InvalidAccessToken:
+            return Response(
+                {"error": "password reset token already used"}, 
+                status=status.HTTP_400_BAD_REQUEST)
 
         if user and password == password2:
             user.set_password(password)
             user.save()
             
             return Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        if not user:
+            error = "no user found"
+        elif password != password2:
+            error = "passwords don't match!"
+        return Response(
+            {"error": error},
+            status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 

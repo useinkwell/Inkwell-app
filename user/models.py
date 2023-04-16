@@ -61,4 +61,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return self.user_name
-        
+
+
+class InvalidAccessToken(models.Model):
+    token = models.CharField(max_length=1000)
+    datetime = models.DateTimeField(default=timezone.now)
+    
