@@ -16,7 +16,7 @@ User Registration
 | **method:** POST
 | **requires authentication:** no
 
-Description: Creates a new user with the submitted info and returns the user access token and refresh token.
+Description: Creates a new user with the submitted info and returns the user access token and refresh token. At this point, the new user account is inactive and the tokens cannot be used yet. However, an email containing the account activation URL is sent to the provided user email for email verification purposes. Opening the URL received in the email activates the profile after which the access and refresh tokens become usable. An "email verified" page/route (can even be the homepage) should be implemented at the client side for redirecting the browser to it once the user profile is activated. This route (decided at the client side) would then be implemented at the server side to redirect it accordingly.
 
 Path Parameters: None
 	
@@ -35,6 +35,7 @@ Request Body:
 
 
 .. _login:
+
 Obtain User Access Token
 ------------------------
 | **endpoint:** /token/
@@ -74,5 +75,46 @@ Request Body:
 	Optional fields: None.
 	
 
+Forgot Password
+-------------------------
+| **endpoint:** /forgot_password/
+| **method:** POST
+| **requires authentication:** no
+
+Description: Sends an password reset URL to the given user email if a user with such email exists. A "password reset" page/route should be implemented at the client side, and this route would be used at the server side when sending the email so that when the password reset URL is clicked it directs to that designated password reset page at the client side. The requirements for the password reset page would be discussed in the "Reset Password" endpoint below.
+
+Path Parameters: None
+	
+Query parameters: None
+
+Request Body:
+	Required fields:
+		| **email:** The specified user email.
+		
+	Optional fields: None.
+	
+
+Reset Password
+-------------------------
+| **endpoint:** /reset_password/
+| **method:** POST
+| **requires authentication:** no
+
+Description: Resets the user password with the specified new password as well as the encrypted access_token (x_access_token) received as query parameter from the password reset URL sent to the user email. This comes after using the "Forgot Password" endpoint above. As discussed briefly in the "Forgot Password" endpoint, a "password reset" page/route should be implemented at the client side and this route would be used at the server side when sending the email so that when the password reset URL is clicked it directs to that designated password reset page at the client side (while keeping the x_access_token query parameter attached). The password reset page must have a **password** and **password2** field for password confirmation at the client side, and the **x_access_token** query parameter automatically added in the URL from the password reset email should be left untouched. Just to be clear, it is the "password reset" page at the client side which submits a POST request to this "Reset Password" endpoint.
+Bear in mind that once a successful form submission is done, the password reset URL received in the email can no longer be used. Hence it is advisable to implement necessary form validation at the client side (even though it would still be validated at the server side for full security).
+
+Path Parameters: None
+	
+Query parameters:
+	**x_access_token**: This is an encrypted JWT access token automatically added in the password reset URL and is the only instance where a query parameter is mandatory.
+
+Request Body:
+	Required fields:
+		| **password:** The new password.
+		| **password2:** The confirmation password. Both must be the same.
+		
+	Optional fields: None.
+	
+	
 
 
