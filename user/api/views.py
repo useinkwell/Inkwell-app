@@ -138,7 +138,10 @@ class ForgotPassword(APIView):
             )
             return Response(status=status.HTTP_200_OK)
             
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "no user with this email exists"},
+            status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class ResetPassword(APIView):
