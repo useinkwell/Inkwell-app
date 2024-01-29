@@ -46,14 +46,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_name = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
-    gender = models.CharField(max_length=20)
+    niche = models.CharField(max_length=20)
     date_registered = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
+    is_pro_plan = models.BooleanField(default=False)
 
     image_file = models.ImageField(upload_to="profile_pics", null=False, default='default.ico')
     bio = models.CharField(max_length=500, null=False, default="nothing to see here")
-    membership = models.CharField(max_length=20, null=False, default="Basic")
 
     USERNAME_FIELD = 'email'    
     REQUIRED_FIELDS = ['user_name', 'first_name', 'last_name']

@@ -17,14 +17,14 @@ class UserSerializer(serializers.ModelSerializer):
         user_name = self.validated_data.get('user_name')
         first_name = self.validated_data.get('first_name')
         last_name = self.validated_data.get('last_name')
-        gender = self.validated_data.get('gender')
+        niche = self.validated_data.get('niche')
         password = self.validated_data.get('password') # raw text password
         user = User(
             email=email,
             user_name=user_name,
             first_name=first_name,
             last_name=last_name,
-            gender=gender
+            niche=niche
         )
         
         if password:

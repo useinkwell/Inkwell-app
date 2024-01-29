@@ -69,7 +69,7 @@ class Register(APIView):
                 Click this link to activate your Inkwell account:
                 http://127.0.0.1:8000/auth/verify/?x_access_token={encrypted_access_token.decode()}/
                 ''',
-                'no-reply@inkwellteam.com',
+                'onboarding@resend.dev',
                 new_user.email
             )
 
