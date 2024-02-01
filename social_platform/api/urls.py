@@ -1,4 +1,6 @@
 from django.urls import path
+from .views import upload_image_view
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from . import views
 
@@ -9,6 +11,10 @@ urlpatterns = [
 
     path('comments/post/<int:pk>/', views.CommentList.as_view(), name='comment_list'),
     path('comment/<int:pk>/', views.CommentDetail.as_view(), name='comment_detail'),
+
+    path('imageUPload/', csrf_exempt(upload_image_view)),
+    path('fileUPload/', csrf_exempt(views.uploadf)),
+    path("linkfetching/", csrf_exempt(views.upload_link_view)),
 
     path('react/add/<str:model>/<int:instance_id>/<str:emoji>/', views.React.as_view(), name='react'),
     path('react/remove/<str:model>/<int:instance_id>/<str:emoji>/', views.UnReact.as_view(), name='unreact'),

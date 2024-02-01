@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 import json
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import requires_csrf_token
 
 # models
 from social_platform.models import Post, Comment, Reaction, Following, Notification
@@ -83,7 +85,7 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
             # image upload
             request_file_object = request.FILES['image']
             file_storage = FileSystemStorage()
-            file_name = str(request_file_object).split('.')[0]
+            file_name = str(request_file_object)
             stored_file = file_storage.save(file_name, request_file_object)
             file_url = file_storage.url(stored_file)
             valid_data["file"] = {"url": file_url}
@@ -130,6 +132,56 @@ class PostList(mixins.ListModelMixin, mixins.CreateModelMixin,
             # return this query if search field is empty (e.g on page load)
             return Post.objects.order_by(PostList.ordering).all()
 
+@requires_csrf_token
+def upload_image_view(request):
+    print("starting")
+    request_file_object = request.FILES['image']
+    file_storage = FileSystemStorage()
+    file_name = str(request_file_object)
+    stored_file = file_storage.save(f"{file_name}", request_file_object)
+    print("4")
+    print(stored_file)
+    file_url = file_storage.url(stored_file)
+    print("5")
+    return JsonResponse({"success":1, "file":{"url":file_url}})
+
+@requires_csrf_token
+def uploadf(request):
+        f=request.FILES['file']
+        fs=FileSystemStorage()
+        filename,ext=str(f).split('.')
+        print(filename,ext)
+        file=fs.save(str(f),f)
+        fileurl=fs.url(file)
+        fileSize=fs.size(file)
+        print({'success':1,'file':{'url':fileurl,'name':str(f),'size':fileSize}})
+        return JsonResponse({'success':1,'file':{'url':fileurl,'name':str(f),'size':fileSize}})
+
+def upload_link_view(request):
+    import requests
+    from bs4 import BeautifulSoup  
+
+    print(request.GET['url'])
+    url = request.GET['url']
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text,features="html.parser")
+    metas = soup.find_all('meta')
+    description=""
+    title=""
+    image=""
+    for meta in metas:
+        if 'property' in meta.attrs:
+            if (meta.attrs['property']=='og:image'):
+                image=meta.attrs['content']         
+        elif 'name' in meta.attrs:         
+            if (meta.attrs['name']=='description'):
+                description=meta.attrs['content']
+            if (meta.attrs['name']=='title'):
+                title=meta.attrs['content']
+    print({'success':1,'meta':{"description":description,"title":title, "image":{"url":image}}})
+    return JsonResponse({'success':1,'meta':
+    {"description":description,"title":title, "image":{"url":image}
+        }})
      
 class PostDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin, generics.GenericAPIView):
@@ -520,15 +572,8 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
             affected_id = parent_comment.id
             comment_or_reply_modifier = 'replied to'
 
-        if user.gender == 'male':
-            gender_pronoun = 'him'
-        elif user.gender == 'female':
-            gender_pronoun = 'her'
-        else:
-            gender_pronoun = 'their'        
-
         if user == post.user:
-            poster_reference = gender_pronoun
+            poster_reference = "author's"
         else:
             poster_reference = post.user.user_name + "'s"
 

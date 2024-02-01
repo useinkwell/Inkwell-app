@@ -24,14 +24,38 @@ class Activity(models.Model):
 
 
 class Post(models.Model):
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
     title =  models.CharField(max_length=40, null=False)
     category = models.CharField(max_length=40, null=True, blank=True)
     caption = models.CharField(max_length=100, null=True, blank=True)
-    date_posted = models.DateTimeField(default=timezone.now)
-    content = EditorJsField ()
     content_img = models.ImageField(upload_to="post_pics", null=False, default='post_default.ico')
+    content = EditorJsField(editorjs_config={
+        "tools": {
+            "Link":{
+                    "config":{
+                        "endpoint":
+                            'http://127.0.0.1:8000/api/linkfetching/'
+                        }
+                },
+            "Image":{
+                "config": {
+                    "endpoints": {
+                        "byFile": 'http://127.0.0.1:8000/api/fileUPload/',
+                        "byUrl": 'http://localhost:8000/api/fileUPload/',
+                    },
+                    "additionalRequestHeaders": [{"Content-Type":'multipart/form-data'}]
+                }
+            },
+            "Attaches":{
+                    "config":{
+                        "endpoint":'http://127.0.0.1:8000/api/fileUPload/'
+                    }
+                }
+        }
+    })
     hashtags = models.CharField(max_length=200, null=True, blank=True)
-    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    date_posted = models.DateTimeField(default=timezone.now)
+    draft = models.BooleanField(default=True)
 
     # generic related fields for reverse quering
     activity = GenericRelation(Activity, related_query_name='post_object')

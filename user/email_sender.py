@@ -1,41 +1,17 @@
 import requests
 import os
-from dotenv import load_dotenv
-load_dotenv()
+from django.core.mail import send_mail
 
 
-def send_email(subject, message, sender, *recipients):
+def send_email(subject, body, sender, recipient):
+	send_mail(subject, body, sender, [recipient])
 
-	X_RAPID_API_KEY = os.environ.get('X_RAPID_API_KEY')
+	print("Email sent successfully!")
 
-	url = "https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send"
-
-	payload = {
-		"personalizations": [
-			{
-				"to": [{"email": f"{email}"} for email in recipients],
-				"subject": f"{subject}"
-			}
-		],
-		"from": {"email": f"{sender}"},
-		"content": [
-			{
-				"type": "text/plain",
-				"value": f"{message}"
-			}
-		]
-	}
-	headers = {
-		"content-type": "application/json",
-		"X-RapidAPI-Key": X_RAPID_API_KEY,
-		"X-RapidAPI-Host": "rapidprod-sendgrid-v1.p.rapidapi.com"
-	}
-
-	response = requests.request("POST", url, json=payload, headers=headers)
-
-	print(response.text)
-	print(f"SENT EMAIL to {recipients}")
+	return True
 
 
 if __name__ == '__main__':
-	send_email('Subject', 'Body of email', 'sender@gmail.com', 'recipient@gmail.com')
+	r = send_email('Subject', 'Body of email', 'techygeekr@gmail.com', 'jaminonuegbu@gmail.com')
+	print("done")
+	print(r)

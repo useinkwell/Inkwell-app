@@ -27,6 +27,9 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 CRYPTOGRAPHY_KEY = os.environ.get('CRYPTOGRAPHY_KEY')
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+MAIL_PASS = os.environ.get('MAIL_PASS')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -142,12 +145,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
-MEDIA_ROOT = 'media/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static_projects'
+]
 
-MEDIA_URL = 'media/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn","static_root")
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn","media_root")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -172,3 +179,12 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False
 }
+
+# email settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = MAIL_USERNAME
+EMAIL_HOST_PASSWORD = MAIL_PASS
