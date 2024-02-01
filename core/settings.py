@@ -27,6 +27,9 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 CRYPTOGRAPHY_KEY = os.environ.get('CRYPTOGRAPHY_KEY')
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+MAIL_PASS = os.environ.get('MAIL_PASS')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -176,3 +179,12 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False
 }
+
+# email settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = MAIL_USERNAME
+EMAIL_HOST_PASSWORD = MAIL_PASS

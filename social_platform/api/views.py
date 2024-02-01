@@ -572,15 +572,8 @@ class CommentList(mixins.ListModelMixin, mixins.CreateModelMixin,
             affected_id = parent_comment.id
             comment_or_reply_modifier = 'replied to'
 
-        if user.gender == 'male':
-            gender_pronoun = 'him'
-        elif user.gender == 'female':
-            gender_pronoun = 'her'
-        else:
-            gender_pronoun = 'their'        
-
         if user == post.user:
-            poster_reference = gender_pronoun
+            poster_reference = "author's"
         else:
             poster_reference = post.user.user_name + "'s"
 

@@ -69,7 +69,7 @@ class Register(APIView):
                 Click this link to activate your Inkwell account:
                 http://127.0.0.1:8000/auth/verify/?x_access_token={encrypted_access_token.decode()}/
                 ''',
-                'onboarding@resend.dev',
+                'techygeekr@gmail.com',
                 new_user.email
             )
 
@@ -133,7 +133,7 @@ class ForgotPassword(APIView):
                 Click this link to reset your Inkwell password:
                 http://127.0.0.1:8000/auth/reset_password/?x_access_token={encrypted_access_token.decode()}/
                 ''',
-                'no-reply@inkwellteam.com',
+                'techygeekr@gmail.com',
                 user_email
             )
             return Response(status=status.HTTP_200_OK)

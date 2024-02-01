@@ -1,27 +1,17 @@
 import requests
 import os
-from dotenv import load_dotenv
-load_dotenv()
-
-import resend
-
-resend.api_key = "re_Q11JVdGL_2h6DWiCDRjB3Gac1ZNoKJUSX"
-
-def send_email(subject, message, sender, *recipients):
-
-	RESEND_API_KEY = os.environ.get('X_RAPID_API_KEY')
+from django.core.mail import send_mail
 
 
-	r = resend.Emails.send({
-	"from": sender,
-	"to": recipients,
-	"subject": subject,
-	"text": message
-	})
+def send_email(subject, body, sender, recipient):
+	send_mail(subject, body, sender, [recipient])
 
-	print(r)
+	print("Email sent successfully!")
+
+	return True
 
 
 if __name__ == '__main__':
-	send_email('Subject', 'Body of email', 'sender@gmail.com', 'recipient@gmail.com')
-
+	r = send_email('Subject', 'Body of email', 'techygeekr@gmail.com', 'jaminonuegbu@gmail.com')
+	print("done")
+	print(r)

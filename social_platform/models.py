@@ -34,7 +34,7 @@ class Post(models.Model):
             "Link":{
                     "config":{
                         "endpoint":
-                            'http://localhost:8000/api/linkfetching/'
+                            'http://127.0.0.1:8000/api/linkfetching/'
                         }
                 },
             "Image":{
